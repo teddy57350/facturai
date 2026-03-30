@@ -1,6 +1,7 @@
 // pages/index.js
 export default function Home() {
   return (
+    <div>
     <>
       <style jsx global>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
