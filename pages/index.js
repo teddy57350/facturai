@@ -1,7 +1,6 @@
 // pages/index.js
 export default function Home() {
   return (
-    <div>
     <>
       <style jsx global>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -91,52 +90,22 @@ export default function Home() {
           .hero h1 { font-size: 24px; }
         }
       `}</style>
-<header>
-  <div className="logo">Factur<span>X</span></div>
-  <span className="badge-legale">Conforme EN 16931</span>
-</header>
 
-<div className="container">
-  <div className="hero">
+      <header>
+        <div className="logo">Factur<span>X</span></div>
+        <span className="badge-legale">Conforme EN 16931</span>
+      </header>
 
-    <h1>Convertissez vos factures en Factur-X</h1>
-    <p>
-      Uploadez votre facture — l'IA extrait les données automatiquement et génère le format légal.
-    </p>
-
-    <div className="hero-badges">
-      <span className="hbadge">Obligation légale 2026-2027</span>
-      <span className="hbadge">100% automatique</span>
-      <span className="hbadge">Gratuit pour démarrer</span>
-    </div>
-
-    <button
-      id="payButton"
-      style={{
-        background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-        color: "white",
-        padding: "14px 22px",
-        border: "none",
-        borderRadius: "12px",
-        fontSize: "16px",
-        fontWeight: "600",
-        cursor: "pointer",
-        boxShadow: "0 10px 25px rgba(79, 70, 229, 0.4)",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      }}
-      onMouseOver={(e) => {
-        e.target.style.transform = "scale(1.05)";
-        e.target.style.boxShadow = "0 15px 35px rgba(79, 70, 229, 0.6)";
-      }}
-      onMouseOut={(e) => {
-        e.target.style.transform = "scale(1)";
-        e.target.style.boxShadow = "0 10px 25px rgba(79, 70, 229, 0.4)";
-      }}
-    >
-      🚀 Payer maintenant
-    </button>
-         </div>  {/* hero */}
-         </div> {/* container */}
+      <div className="container">
+        <div className="hero">
+          <h1>Convertissez vos factures en Factur-X</h1>
+          <p>Uploadez votre facture — l'IA extrait les données automatiquement et génère le format légal.</p>
+          <div className="hero-badges">
+            <span className="hbadge">Obligation légale 2026-2027</span>
+            <span className="hbadge">100% automatique</span>
+            <span className="hbadge">Gratuit pour démarrer</span>
+          </div>
+        </div>
 
         <div className="steps">
           <div className="step active" id="step1"><span className="step-n">ÉTAPE 1</span>Import</div>
@@ -263,8 +232,10 @@ export default function Home() {
               <div className="conf-item"><span className="check">✓</span> Format PDF/A-3</div>
             </div>
           </div>
+        </div>
+      </div>
 
-     
+      <script dangerouslySetInnerHTML={{__html: `
         let factureData = null;
         let xmlGenere = '';
 
@@ -477,3 +448,4 @@ export default function Home() {
     </>
   );
 }
+
