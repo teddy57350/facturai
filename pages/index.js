@@ -117,8 +117,6 @@ export default function Home() {
 <button
   id="payButton"
   style={{
-    background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-    color: "white",
     padding: "14px 22px",
     border: "none",
     borderRadius: "12px",
