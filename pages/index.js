@@ -1,4 +1,3 @@
-✅ INDEX COMPLET (ORIGINAL + SEUL AJOUT BOUTON)
 // pages/index.js
 export default function Home() {
   return (
