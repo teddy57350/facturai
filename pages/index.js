@@ -1,5 +1,39 @@
 // pages/index.js
-export default function Home() {
+import { useEffect } from "react";
+useEffect(() => {
+  let factureData = null;
+  let xmlGenere = '';
+
+  function goTo(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById('page'+i)?.classList.add('hidden');
+      const s = document.getElementById('step'+i);
+      if (s) {
+        s.classList.remove('active');
+        s.style.background = '';
+        s.style.color = '';
+        s.style.fontWeight = '';
+      }
+    });
+
+    document.getElementById('page'+n)?.classList.remove('hidden');
+    const stepEl = document.getElementById('step'+n);
+    if (stepEl) stepEl.classList.add('active');
+  }
+
+  function handleClick() {
+    alert("Paiement !");
+  }
+
+  // exemple d’event
+  const btnDemo = document.getElementById('btnDemo');
+  if (btnDemo) {
+    btnDemo.addEventListener('click', () => {
+      alert("Demo");
+    });
+  }
+
+}, []);
   return (
     <>
       <style jsx global>{`
