@@ -115,6 +115,27 @@ export default function Home() {
     e.target.style.boxShadow = "0 15px 35px rgba(79, 70, 229, 0.6)";
   }}
 <button
+  id="payButton"
+  style={{
+    background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+    color: "white",
+    padding: "14px 22px",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    boxShadow: "0 10px 25px rgba(79, 70, 229, 0.4)",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  }}
+  onMouseOver={(e) => {
+    e.target.style.transform = "scale(1.05)";
+    e.target.style.boxShadow = "0 15px 35px rgba(79, 70, 229, 0.6)";
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = "scale(1)";
+    e.target.style.boxShadow = "0 10px 25px rgba(79, 70, 229, 0.4)";
+  }}
   onClick={handleClick}
 >
   🚀 Payer maintenant
