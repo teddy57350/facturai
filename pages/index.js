@@ -4,33 +4,9 @@ import { useState } from "react";
 export default function Home() {
   const [step, setStep] = useState(0);
 
-  // 👉 EXEMPLE HTML (conversion facture)
-  const htmlExample = `
-  <div style="font-family:Arial;padding:20px;border:1px solid #ddd">
-    <h2>FACTURE #INV-001</h2>
-    <p><b>Client :</b> ACME Corp</p>
-    <p><b>Date :</b> 2026-01-01</p>
-
-    <table border="1" cellpadding="8" cellspacing="0" width="100%">
-      <tr>
-        <th>Produit</th>
-        <th>Qté</th>
-        <th>Prix</th>
-      </tr>
-      <tr>
-        <td>Service SaaS</td>
-        <td>1</td>
-        <td>19€</td>
-      </tr>
-    </table>
-
-    <h3>Total : 19€</h3>
-  </div>
-  `;
-
   return (
     <>
-      {/* STYLE GLOBAL */}
+      {/* GLOBAL STYLE */}
       <style jsx global>{`
         body {
           margin: 0;
@@ -100,6 +76,14 @@ export default function Home() {
           color: white;
         }
 
+        .card {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid #eee;
+          margin-top: 1rem;
+        }
+
         .pricing {
           display: flex;
           gap: 20px;
@@ -129,15 +113,16 @@ export default function Home() {
           margin: 10px 0;
         }
 
-        .example {
+        .invoice {
           margin-top: 3rem;
           background: white;
-          padding: 1.5rem;
+          border: 1px solid #e5e7eb;
           border-radius: 12px;
-          border: 1px solid #eee;
+          padding: 2rem;
         }
 
-        .html-box {
+        .htmlBox {
+          margin-top: 2rem;
           background: #0f172a;
           color: #22c55e;
           padding: 1rem;
@@ -159,7 +144,7 @@ export default function Home() {
         {/* HERO */}
         <div className="hero">
           <h1>Factur-X automatique</h1>
-          <p>IA + conversion PDF/A-3 + XML embarqué</p>
+          <p>IA + génération PDF/A-3 + XML embarqué</p>
 
           <button className="btn" onClick={() => setStep(1)}>
             🚀 Commencer
@@ -201,14 +186,84 @@ export default function Home() {
 
         {/* STEP 3 */}
         {step === 3 && (
-          <div className="card">
-            <h3>✅ Facture générée</h3>
-            <p>Factur-X prêt (PDF/A-3 + XML)</p>
+          <>
+            <div className="card">
+              <h3>✅ Facture générée</h3>
+              <p>Format Factur-X prêt</p>
 
-            <button className="btn" onClick={() => setStep(0)}>
-              Nouvelle facture
-            </button>
-          </div>
+              <button className="btn" onClick={() => setStep(0)}>
+                Nouvelle facture
+              </button>
+            </div>
+
+            {/* 🧾 FACTURE VISUELLE */}
+            <div className="invoice">
+
+              <h2>🧾 FACTURE #INV-001</h2>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div>
+                  <p><b>FacturX SaaS</b></p>
+                  <p>Entreprise Demo</p>
+                </div>
+
+                <div style={{ textAlign: "right" }}>
+                  <p><b>Date :</b> 01/01/2026</p>
+                  <p><b>Client :</b> ACME Corp</p>
+                </div>
+              </div>
+
+              <hr />
+
+              <table width="100%" cellPadding="8">
+                <thead>
+                  <tr style={{ background: "#f3f4f6" }}>
+                    <th align="left">Description</th>
+                    <th>Qté</th>
+                    <th>Prix</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>Abonnement SaaS Pro</td>
+                    <td align="center">1</td>
+                    <td align="center">19€</td>
+                    <td align="center">19€</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3 style={{ textAlign: "right" }}>
+                Total : 19€
+              </h3>
+
+            </div>
+
+            {/* 💻 HTML CONVERSION */}
+            <div className="htmlBox">
+
+{`<div class="invoice">
+  <h2>FACTURE #INV-001</h2>
+
+  <p>FacturX SaaS</p>
+  <p>Client: ACME Corp</p>
+  <p>Date: 01/01/2026</p>
+
+  <table>
+    <tr>
+      <td>Abonnement SaaS Pro</td>
+      <td>1</td>
+      <td>19€</td>
+    </tr>
+  </table>
+
+  <h3>Total: 19€</h3>
+</div>`}
+
+            </div>
+          </>
         )}
 
         {/* PRICING */}
@@ -247,16 +302,6 @@ export default function Home() {
             </button>
           </div>
 
-        </div>
-
-        {/* EXEMPLE TEST + HTML */}
-        <div className="example">
-          <h2>🧪 Exemple de facture générée</h2>
-          <p>Voici un exemple de conversion HTML d’une facture :</p>
-
-          <div className="html-box">
-            {htmlExample}
-          </div>
         </div>
 
       </div>
