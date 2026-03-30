@@ -459,16 +459,24 @@ export default function Home() {
       alert('Erreur lors de la création de la session.');
     }
   }}
-  style={{
-    marginTop: '20px',
-    padding: '12px 24px',
-    fontSize: '16px',
-    backgroundColor: '#2563EB',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer'
-  }}
->
-  S’abonner à 19€
-</button>
+ return (
+  <>
+    {/* ... votre style et autres contenus ... */}
+
+    {/* fin de votre contenu, juste avant la dernière balise fermante */}
+    <button
+      style={{
+        marginTop: '20px',
+        padding: '12px 24px',
+        fontSize: '16px',
+        backgroundColor: '#2563EB',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer'
+      }}
+    >
+      S’abonner à 19€
+    </button>
+  </>
+);
