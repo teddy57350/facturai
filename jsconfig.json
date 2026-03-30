@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }"engines": {
+    }
+    "vercel": {
 "node": ">=18"
   }
 }
