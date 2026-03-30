@@ -17,21 +17,23 @@ function SubscribeButton() {
 
   return (
     <button
-      onClick={handleSubscribe}
-      style={{
-        margin: '20px auto',
-        display: 'block',
-        padding: '12px 24px',
-        fontSize: '16px',
-        backgroundColor: '#2563EB',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: 'pointer'
-      }}
-    >
-      S’abonner à 19€
-    </button>
+  onClick={handleSubscribe}
+  style={{
+    marginTop: '20px',
+    padding: '12px 24px',
+    fontSize: '16px',
+    backgroundColor: '#2563EB',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    pointerEvents: 'auto',
+    position: 'relative', // ou 'relative' si besoin
+    zIndex: 9999 // pour le mettre au premier plan
+  }}
+>
+  S’abonner à 19€
+</button>
   );
 }
 
