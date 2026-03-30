@@ -263,8 +263,6 @@ export default function Home() {
               <div className="conf-item"><span className="check">✓</span> Format PDF/A-3</div>
             </div>
           </div>
-        </div>
-      </div>
 
      
         let factureData = null;
