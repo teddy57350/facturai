@@ -1,34 +1,43 @@
 // pages/index.js
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe('VOTRE_CLÉ_PUBLIQUE');
+
 export default function Home() {
+  const handleButtonClick = async () => {
+    const stripe = await stripePromise;
+    const response = await fetch('/api/create-checkout-session', { method: 'POST' });
+    const data = await response.json();
+    if (data.sessionId) {
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    } else {
+      alert('Erreur lors de la création de la session.');
+    }
+  };
+
   return (
     <>
       <style jsx global>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F8F9FA; color: #1A1A2E; min-height: 100vh; }
-
         header { background: white; border-bottom: 1px solid #E5E7EB; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
         .logo { font-size: 20px; font-weight: 700; color: #1A1A2E; }
         .logo span { color: #2563EB; }
         .badge-legale { background: #DCFCE7; color: #166534; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
-
         .container { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
-
         .hero { text-align: center; margin-bottom: 2.5rem; }
         .hero h1 { font-size: 32px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
         .hero p { font-size: 16px; color: #6B7280; max-width: 500px; margin: 0 auto 1.5rem; }
         .hero-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
         .hbadge { background: white; border: 1px solid #E5E7EB; border-radius: 20px; padding: 6px 14px; font-size: 13px; color: #374151; }
-
         .steps { display: flex; gap: 0; margin-bottom: 2rem; background: white; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
         .step { flex: 1; padding: 16px 12px; text-align: center; font-size: 13px; color: #9CA3AF; border-right: 1px solid #E5E7EB; position: relative; }
         .step:last-child { border-right: none; }
         .step.active { color: #2563EB; background: #EFF6FF; font-weight: 600; }
         .step.done { color: #16A34A; background: #F0FDF4; }
         .step-n { display: block; font-size: 11px; margin-bottom: 2px; opacity: 0.7; }
-
         .card { background: white; border-radius: 12px; border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1rem; }
-
-        /* Ajoutez ici tout votre CSS existant */
+        /* Ajoutez votre CSS ici, inchangé */
       `}</style>
 
       <header>
@@ -47,7 +56,6 @@ export default function Home() {
             <span className="hbadge">Gratuit pour démarrer</span>
           </div>
         </div>
-
         <div className="steps">
           <div className="step active" id="step1"><span className="step-n">ÉTAPE 1</span>Import</div>
           <div className="step" id="step2"><span className="step-n">ÉTAPE 2</span>Vérification</div>
@@ -56,9 +64,9 @@ export default function Home() {
 
         {/* autres contenus... */}
 
-        {/* Placement du bouton en toute fin, juste avant la fermeture de la div container */}
+        {/* Placez ici le bouton en fin de page */}
         <button
-          id="btnAbonnement"
+          onClick={handleButtonClick}
           style={{
             marginTop: '20px',
             padding: '12px 24px',
@@ -73,23 +81,6 @@ export default function Home() {
           S’abonner à 19€
         </button>
       </div>
-      
-      {/* Script pour le bouton */}
-      <script src="https://js.stripe.com/v3/"></script>
-      <script>
-        document.getElementById('btnAbonnement').addEventListener('click', function() {
-          fetch('/api/create-checkout-session', { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-              if(data.sessionId) {
-                var stripe = Stripe('pk_test_51TGRHH567jEq7M8FSeNdZhGdAGCQy9yjXmHJRC78Npt07GLPQPnr52hDHIjDNxLeJDqGOtRgNhdVawWtdKbceITf00WFKo61ji');
-                stripe.redirectToCheckout({ sessionId: data.sessionId });
-              } else {
-                alert('Erreur lors de la création de la session.');
-              }
-           </
-        });
-      </script>
     </>
   );
 }
