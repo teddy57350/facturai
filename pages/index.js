@@ -2,11 +2,30 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+  const [invoicesUsed, setInvoicesUsed] = useState(0);
+  const [isPro, setIsPro] = useState(false);
+
+  const MAX_FREE = 10;
+
+  const handleStart = () => {
+    if (!isPro && invoicesUsed >= MAX_FREE) {
+      alert("Limite atteinte (10 factures/mois). Passe à Pro pour 19€/mois 🚀");
+      return;
+    }
+
+    setStep(1);
+    setInvoicesUsed(invoicesUsed + 1);
+  };
+
+  const handleSubscribe = () => {
+    // 🔥 ici plus tard Stripe Checkout
+    alert("Redirection vers paiement Stripe (19€/mois) 💳");
+    setIsPro(true);
+  };
 
   return (
     <>
-      {/* GLOBAL STYLE */}
       <style jsx global>{`
         body {
           margin: 0;
@@ -30,7 +49,6 @@ export default function Home() {
 
         .logo {
           font-weight: 800;
-          font-size: 18px;
         }
 
         .badge {
@@ -56,25 +74,9 @@ export default function Home() {
           font-weight: 600;
         }
 
-        .steps {
-          display: flex;
-          margin: 2rem 0;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .step {
-          flex: 1;
-          padding: 10px;
-          text-align: center;
-          background: #f1f1f1;
-          font-size: 13px;
-        }
-
-        .step.active {
-          background: #4f46e5;
-          color: white;
+        .btn-secondary {
+          background: #111;
+          margin-left: 10px;
         }
 
         .card {
@@ -84,37 +86,52 @@ export default function Home() {
           border: 1px solid #eee;
           margin-top: 1rem;
         }
+
+        .pricing {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 2px solid #4f46e5;
+          margin-top: 2rem;
+          text-align: center;
+        }
+
+        .price {
+          font-size: 32px;
+          font-weight: 800;
+          margin: 10px 0;
+        }
+
+        .small {
+          font-size: 13px;
+          color: #666;
+        }
       `}</style>
 
       {/* HEADER */}
       <header>
         <div className="logo">FacturX SaaS</div>
-        <div className="badge">EN 16931</div>
+        <div className="badge">
+          {isPro ? "PRO" : `${invoicesUsed}/10 free`}
+        </div>
       </header>
 
       <div className="container">
 
         {/* HERO */}
         <div className="hero">
-          <h1>Générez vos factures Factur-X</h1>
-          <p>IA + conformité automatique PDF/A-3 + XML embarqué</p>
+          <h1>Factur-X automatique</h1>
+          <p>10 factures gratuites / mois puis 19€/mois</p>
 
-          <button className="btn" onClick={() => setStep(1)}>
-            🚀 Commencer
+          <button className="btn" onClick={handleStart}>
+            🚀 Créer une facture
           </button>
-        </div>
-
-        {/* STEPS */}
-        <div className="steps">
-          <div className={`step ${step === 1 ? "active" : ""}`}>Upload</div>
-          <div className={`step ${step === 2 ? "active" : ""}`}>Vérification</div>
-          <div className={`step ${step === 3 ? "active" : ""}`}>Export</div>
         </div>
 
         {/* STEP 1 */}
         {step === 1 && (
           <div className="card">
-            <h3>📄 Upload facture</h3>
+            <h3>Upload facture</h3>
             <input type="file" />
             <br /><br />
             <button className="btn" onClick={() => setStep(2)}>
@@ -126,12 +143,8 @@ export default function Home() {
         {/* STEP 2 */}
         {step === 2 && (
           <div className="card">
-            <h3>🔍 Vérification IA</h3>
-
-            <input placeholder="Numéro facture" />
-            <br /><br />
+            <h3>Vérification</h3>
             <input placeholder="Client" />
-
             <br /><br />
 
             <button onClick={() => setStep(1)}>Retour</button>
@@ -146,10 +159,28 @@ export default function Home() {
         {step === 3 && (
           <div className="card">
             <h3>✅ Facture générée</h3>
-            <p>Format Factur-X prêt (PDF/A-3 + XML)</p>
+            <p>Factur-X prêt</p>
 
-            <button className="btn" onClick={() => setStep(1)}>
+            <button className="btn" onClick={() => setStep(0)}>
               Nouvelle facture
+            </button>
+          </div>
+        )}
+
+        {/* PRICING */}
+        {!isPro && (
+          <div className="pricing">
+            <h2>Passer en PRO</h2>
+            <div className="price">19€ / mois</div>
+
+            <p className="small">
+              ✔ Factures illimitées<br />
+              ✔ Export Factur-X automatique<br />
+              ✔ Support prioritaire
+            </p>
+
+            <button className="btn" onClick={handleSubscribe}>
+              💳 S'abonner
             </button>
           </div>
         )}
