@@ -117,7 +117,8 @@ export default function Home() {
   onMouseOut={(e) => {
     e.target.style.transform = "scale(1)";
     e.target.style.boxShadow = "0 10px 25px rgba(79, 70, 229, 0.4)";
-  }}>
+  }}
+  >
 🚀 Payer maintenant
   </button>
           <h1>Convertissez vos factures en Factur-X</h1>
