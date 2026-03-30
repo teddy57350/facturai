@@ -134,6 +134,8 @@ export default function Home() {
     >
       🚀 Payer maintenant
     </button>
+         </div>  {/* hero */}
+         </div> {/* container */}
 
         <div className="steps">
           <div className="step active" id="step1"><span className="step-n">ÉTAPE 1</span>Import</div>
