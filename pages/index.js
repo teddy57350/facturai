@@ -1,7 +1,7 @@
 // pages/index.js
 import { loadStripe } from '@stripe/stripe-js';
 
-js const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+const stripePromise = loadStripe('pk_test_51TGRHH567jEq7M8FSeNdZhGdAGCQy9yjXmHJRC78Npt07GLPQPnr52hDHIjDNxLeJDqGOtRgNhdVawWtdKbceITf00WFKo61ji');
 
 export default function Home() {
   const handleButtonClick = async () => {
@@ -42,8 +42,6 @@ export default function Home() {
         .step-n { display: block; font-size: 11px; margin-bottom: 2px; opacity: 0.7; }
 
         .card { background: white; border-radius: 12px; border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1rem; }
-
-        /* Ajoutez ici tout votre CSS existant */
       `}</style>
 
       <header>
@@ -52,7 +50,7 @@ export default function Home() {
       </header>
 
       <div className="container">
-        {/* contenu existant... */}
+        {/* contenu existant */}
         <div className="hero">
           <h1>Convertissez vos factures en Factur-X</h1>
           <p>Uploadez votre facture — l'IA extrait les données automatiquement et génère le format légal.</p>
@@ -67,8 +65,7 @@ export default function Home() {
           <div className="step" id="step2"><span className="step-n">ÉTAPE 2</span>Vérification</div>
           <div className="step" id="step3"><span className="step-n">ÉTAPE 3</span>Export</div>
         </div>
-        {/* autres contenus... */}
-
+        {/* autres contenus ... */}
         {/* Bouton en fin de page */}
         <button
           onClick={handleButtonClick}
