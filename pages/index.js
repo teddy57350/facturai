@@ -121,6 +121,7 @@ export default function Home() {
   >
 🚀 Payer maintenant
   </button>
+  
           <h1>Convertissez vos factures en Factur-X</h1>
           <p>Uploadez votre facture — l'IA extrait les données automatiquement et génère le format légal.</p>
           <div className="hero-badges">
