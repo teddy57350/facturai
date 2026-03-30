@@ -63,13 +63,8 @@ export default function Home() {
         .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
         .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
         .btn-primary { background: #2563EB; color: white; }
-        .btn-primary:hover { background: #1D4ED8; }
         .btn-secondary { background: white; color: #374151; border: 1px solid #D1D5DB; }
-        .btn-secondary:hover { background: #F9FAFB; }
         .btn-success { background: #16A34A; color: white; }
-        .btn-success:hover { background: #15803D; }
-
-        .success-circle { width: 64px; height: 64px; background: #DCFCE7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 28px; }
 
         .hidden { display: none !important; }
       `}</style>
@@ -81,13 +76,9 @@ export default function Home() {
 
       <div className="container">
 
-        {/* PAGE 1 */}
         <div id="page1"></div>
-
-        {/* PAGE 2 */}
         <div id="page2" className="hidden"></div>
 
-        {/* PAGE 3 — EXPORT */}
         <div id="page3" className="hidden">
           <div className="card" style={{textAlign:'center', padding:'2.5rem 1.5rem'}}>
             <div className="success-circle">✓</div>
@@ -96,25 +87,29 @@ export default function Home() {
               Facture Factur-X générée !
             </h2>
 
-            {/* ✅ SEUL AJOUT = bouton paiement */}
             <div style={{display:'flex', gap:'10px', justifyContent:'center', marginTop:'1.5rem', flexWrap:'wrap'}}>
+
               <button className="btn btn-success" id="btnTelecharger">
                 Télécharger XML Factur-X
               </button>
 
-              <button className="btn btn-primary" id="btnPayer">
+              {/* ➕ BOUTON AJOUTÉ (STRIPE) */}
+              <button
+                className="btn btn-primary"
+                id="btnPayer"
+                onClick={() => window.open("https://buy.stripe.com/test_XXXXXXXXXX", "_blank")}
+              >
                 💳 Payer
               </button>
 
               <button className="btn btn-secondary" id="btnNouveau">
                 Nouvelle facture
               </button>
-            </div>
 
+            </div>
           </div>
         </div>
 
       </div>
     </>
   );
-}
