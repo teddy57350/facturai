@@ -1,42 +1,4 @@
 // pages/index.js
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe('price_1TGRS8567jEq7M8FdoYkX2CT');
-
-function SubscribeButton() {
-  const handleSubscribe = async () => {
-    const stripe = await stripePromise;
-    const response = await fetch('/api/create-checkout-session', { method: 'POST' });
-    const data = await response.json();
-    if (data.sessionId) {
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
-    } else {
-      alert('Erreur lors de la création de la session.');
-    }
-  };
-
-  return (
-    <button
-  onClick={handleSubscribe}
-  style={{
-    marginTop: '20px',
-    padding: '12px 24px',
-    fontSize: '16px',
-    backgroundColor: '#2563EB',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    pointerEvents: 'auto',
-    position: 'relative', // ou 'relative' si besoin
-    zIndex: 9999 // pour le mettre au premier plan
-  }}
->
-  S’abonner à 19€
-</button>
-  );
-}
-
 export default function Home() {
   return (
     <>
@@ -66,7 +28,7 @@ export default function Home() {
 
         .card { background: white; border-radius: 12px; border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1rem; }
 
-        /* Ajoutez votre CSS ici, inchangé */
+        /* Ajoutez ici tout votre CSS existant */
       `}</style>
 
       <header>
@@ -92,11 +54,42 @@ export default function Home() {
           <div className="step" id="step3"><span className="step-n">ÉTAPE 3</span>Export</div>
         </div>
 
-        {/* ... autres contenus ... */}
+        {/* autres contenus... */}
 
-        {/* Placez le bouton ici, en fin de la div container */}
-        <SubscribeButton />
+        {/* Placement du bouton en toute fin, juste avant la fermeture de la div container */}
+        <button
+          id="btnAbonnement"
+          style={{
+            marginTop: '20px',
+            padding: '12px 24px',
+            fontSize: '16px',
+            backgroundColor: '#2563EB',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          S’abonner à 19€
+        </button>
       </div>
+      
+      {/* Script pour le bouton */}
+      <script src="https://js.stripe.com/v3/"></script>
+      <script>
+        document.getElementById('btnAbonnement').addEventListener('click', function() {
+          fetch('/api/create-checkout-session', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+              if(data.sessionId) {
+                var stripe = Stripe('pk_test_51TGRHH567jEq7M8FSeNdZhGdAGCQy9yjXmHJRC78Npt07GLPQPnr52hDHIjDNxLeJDqGOtRgNhdVawWtdKbceITf00WFKo61ji');
+                stripe.redirectToCheckout({ sessionId: data.sessionId });
+              } else {
+                alert('Erreur lors de la création de la session.');
+              }
+            });
+        });
+      </script>
     </>
   );
 }
