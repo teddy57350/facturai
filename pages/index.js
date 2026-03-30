@@ -114,13 +114,14 @@ export default function Home() {
     e.target.style.transform = "scale(1.05)";
     e.target.style.boxShadow = "0 15px 35px rgba(79, 70, 229, 0.6)";
   }}
-  onMouseOut={(e) => {
+ <button
+  onMouseLeave={(e) => {
     e.target.style.transform = "scale(1)";
     e.target.style.boxShadow = "0 10px 25px rgba(79, 70, 229, 0.4)";
   }}
-  >
-🚀 Payer maintenant
-  </button>
+>
+  🚀 Payer maintenant
+</button>
   
           <h1>Convertissez vos factures en Factur-X</h1>
           <p>Uploadez votre facture — l'IA extrait les données automatiquement et génère le format légal.</p>
