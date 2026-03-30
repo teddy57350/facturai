@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     console.error(err);
     res.status(500).json({ error: 'Impossible de créer la session Stripe' });
   }
+  
   import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
