@@ -4,15 +4,38 @@ import { useState } from "react";
 export default function Home() {
   const [step, setStep] = useState(0);
 
+  // 👉 EXEMPLE HTML (conversion facture)
+  const htmlExample = `
+  <div style="font-family:Arial;padding:20px;border:1px solid #ddd">
+    <h2>FACTURE #INV-001</h2>
+    <p><b>Client :</b> ACME Corp</p>
+    <p><b>Date :</b> 2026-01-01</p>
+
+    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+      <tr>
+        <th>Produit</th>
+        <th>Qté</th>
+        <th>Prix</th>
+      </tr>
+      <tr>
+        <td>Service SaaS</td>
+        <td>1</td>
+        <td>19€</td>
+      </tr>
+    </table>
+
+    <h3>Total : 19€</h3>
+  </div>
+  `;
+
   return (
     <>
-      {/* GLOBAL STYLE */}
+      {/* STYLE GLOBAL */}
       <style jsx global>{`
         body {
           margin: 0;
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f6f7fb;
-          color: #111;
         }
 
         .container {
@@ -31,7 +54,6 @@ export default function Home() {
 
         .logo {
           font-weight: 900;
-          font-size: 18px;
         }
 
         .badge {
@@ -57,33 +79,20 @@ export default function Home() {
           font-weight: 600;
         }
 
-        .btn-secondary {
-          background: #111;
-          margin-left: 10px;
-        }
-
-        .card {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          border: 1px solid #eee;
-          margin-top: 1rem;
-        }
-
         .steps {
           display: flex;
-          margin: 2rem 0;
           border-radius: 10px;
           overflow: hidden;
           border: 1px solid #ddd;
+          margin: 2rem 0;
         }
 
         .step {
           flex: 1;
-          text-align: center;
           padding: 10px;
-          font-size: 13px;
+          text-align: center;
           background: #f1f1f1;
+          font-size: 13px;
         }
 
         .step.active {
@@ -95,24 +104,23 @@ export default function Home() {
           display: flex;
           gap: 20px;
           justify-content: center;
-          margin-top: 3rem;
           flex-wrap: wrap;
+          margin-top: 3rem;
         }
 
         .plan {
           width: 300px;
-          border-radius: 14px;
           padding: 2rem;
-          text-align: center;
-          border: 1px solid #e5e7eb;
+          border-radius: 14px;
           background: white;
+          border: 1px solid #e5e7eb;
+          text-align: center;
         }
 
         .plan.pro {
           background: #111827;
           color: white;
           transform: scale(1.05);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
         .price {
@@ -121,14 +129,22 @@ export default function Home() {
           margin: 10px 0;
         }
 
-        .pop {
-          background: #4f46e5;
-          color: white;
-          padding: 4px 10px;
-          border-radius: 20px;
+        .example {
+          margin-top: 3rem;
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid #eee;
+        }
+
+        .html-box {
+          background: #0f172a;
+          color: #22c55e;
+          padding: 1rem;
+          border-radius: 10px;
           font-size: 12px;
-          position: relative;
-          top: -10px;
+          overflow-x: auto;
+          white-space: pre-wrap;
         }
       `}</style>
 
@@ -142,8 +158,8 @@ export default function Home() {
 
         {/* HERO */}
         <div className="hero">
-          <h1>Générez vos factures Factur-X automatiquement</h1>
-          <p>IA + conformité PDF/A-3 + XML embarqué</p>
+          <h1>Factur-X automatique</h1>
+          <p>IA + conversion PDF/A-3 + XML embarqué</p>
 
           <button className="btn" onClick={() => setStep(1)}>
             🚀 Commencer
@@ -173,11 +189,7 @@ export default function Home() {
         {step === 2 && (
           <div className="card">
             <h3>🔍 Vérification IA</h3>
-
-            <input placeholder="Numéro facture" />
-            <br /><br />
             <input placeholder="Client" />
-
             <br /><br />
 
             <button onClick={() => setStep(1)}>Retour</button>{" "}
@@ -191,7 +203,7 @@ export default function Home() {
         {step === 3 && (
           <div className="card">
             <h3>✅ Facture générée</h3>
-            <p>Factur-X (PDF/A-3 + XML embarqué)</p>
+            <p>Factur-X prêt (PDF/A-3 + XML)</p>
 
             <button className="btn" onClick={() => setStep(0)}>
               Nouvelle facture
@@ -205,47 +217,46 @@ export default function Home() {
           {/* FREE */}
           <div className="plan">
             <h3>Gratuit</h3>
-
             <div className="price">0€</div>
 
             <p>
               ✔ 10 factures / mois<br />
               ✔ Export Factur-X<br />
-              ✔ Standard support
+              ✔ Support standard
             </p>
 
-            <button
-              className="btn"
-              style={{ background: "#111", marginTop: "10px" }}
-              onClick={() => alert("Plan Gratuit activé")}
-            >
+            <button className="btn" onClick={() => alert("Plan Gratuit activé")}>
               Commencer
             </button>
           </div>
 
           {/* PRO */}
           <div className="plan pro">
-            <div className="pop">Populaire</div>
-
             <h3>Pro</h3>
-
             <div className="price">19€</div>
 
             <p>
               ✔ Factures illimitées<br />
-              ✔ IA extraction avancée<br />
-              ✔ Export premium Factur-X<br />
+              ✔ IA avancée<br />
+              ✔ Export premium<br />
               ✔ Support prioritaire
             </p>
 
-            <button
-              className="btn"
-              onClick={() => alert("Stripe checkout 19€/mois")}
-            >
+            <button className="btn" onClick={() => alert("Stripe checkout 19€/mois")}>
               Passer Pro
             </button>
           </div>
 
+        </div>
+
+        {/* EXEMPLE TEST + HTML */}
+        <div className="example">
+          <h2>🧪 Exemple de facture générée</h2>
+          <p>Voici un exemple de conversion HTML d’une facture :</p>
+
+          <div className="html-box">
+            {htmlExample}
+          </div>
         </div>
 
       </div>
