@@ -1,12 +1,6 @@
 // pages/index.js
 import { useState } from "react";
 
-export def🚀 JE TE DONNE LA VERSION PROPRE (100% BUILD OK)
-
-👉 COPIE-COLLE CE FICHIER COMPLET :
-
-import { useState } from "react";
-
 export default function Home() {
   const [step, setStep] = useState(1);
 
