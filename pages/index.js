@@ -174,26 +174,31 @@ export default function Home() {
 
             <button className="btn" onClick={() => alert("Plan Gratuit")}>
               Commencer
-            </button>
-          </div>
+          <button
+  className="btn"
+  onClick={async () => {
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+      });
 
-          {/* PRO */}
-          <div className="plan pro">
-            <div className="populaire">Populaire</div>
+      const data = await res.json();
 
-            <h3>Pro</h3>
-            <div className="price">19€</div>
+      console.log("Stripe URL:", data.url); // debug
 
-            <p>
-              ✔ Factures illimitées<br />
-              ✔ IA avancée<br />
-              ✔ Export premium Factur-X<br />
-              ✔ Support prioritaire
-            </p>
-
-            <button className="btn" onClick={() => alert("Stripe checkout")}>
-              Passer Pro
-            </button>
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Erreur: pas d'URL Stripe");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur serveur");
+    }
+  }}
+>
+  Passer Pro
+</button>
           </div>
 
         </div>
