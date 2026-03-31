@@ -297,8 +297,8 @@ export default function Home() {
               ✔ Support prioritaire
             </p>
 
-            <button className="btn" onClick={() => alert("Stripe checkout 19€/mois")}>
-              Passer Pro
+           <button className="btn" onClick={handleCheckout}>
+            Passer Pro
             </button>
           </div>
 
