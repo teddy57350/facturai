@@ -202,6 +202,3 @@ export default function Home() {
     </>
   );
 }
-🧠 CE QUI EST MAINTENANT CORRIGÉ
-
-✔ plus de JSX cassé
