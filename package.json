@@ -8,13 +8,21 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@anthropic-ai/sdk": "^0.28.0",
-    "pdf-parse": "^1.1.1",
-    "mammoth": "^1.8.0",
+"dependencies": {
+  "next": "^14.0.0",
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "@anthropic-ai/sdk": "^0.28.0",
+  "pdf-parse": "^1.1.1",
+  "mammoth": "^1.8.0",
+  "sharp": "^0.33.0",
+  "tesseract.js": "^5.0.0",
+  "xml-js": "^1.6.11",
+  "formidable": "^3.5.1",
+  "stripe": "^14.0.0",
+  "@stripe/stripe-js": "^2.4.0",
+  "@supabase/supabase-js": "^2.0.0"
+}",
     "sharp": "^0.33.0",
     "tesseract.js": "^5.0.0",
     "xml-js": "^1.6.11",
