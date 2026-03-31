@@ -51,12 +51,12 @@ const handleGenerate = async () => {
     a.remove();
 
     setFreeCount((prev) => prev + 1);
-    setStep(3);
+    setStep(0);
 
   } catch (err) {
     console.error(err);
     alert("Erreur génération facture");
-    setStep(1);
+    setStep(0);
   }
 };
     // 2. PDF
