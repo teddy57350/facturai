@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   let event;
 
   try {
-    const rawBody = await buffer(req);
+   const rawBody = await req.text();
 
     event = stripe.webhooks.constructEvent(
       rawBody.toString(),
