@@ -252,4 +252,3 @@ export default function Home() {
     </>
   );
 }
-🎯 CE QUE TU AS MAINTENANT
