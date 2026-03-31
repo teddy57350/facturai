@@ -1,96 +1,118 @@
-// pages/api/analyser.js
-const { IncomingForm } = require('formidable');
-const fs = require('fs').promises;
- 
-// Désactiver le bodyParser de Next.js
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
- 
-// Données d'exemple
-const EXEMPLE_FACTURE = {
-  numero: "FAC-2024-0042",
-  date_emission: "2024-03-15",
-  date_echeance: "2024-04-15",
-  emetteur: {
-    nom: "Tech Solutions SARL",
-    siret: "85234567800012",
-    tva: "FR12852345678",
-    adresse: "15 rue de la Innovation, 67000 Strasbourg"
-  },
-  client: {
-    nom: "Boulangerie Martin",
-    siret: "79845612300045",
-    adresse: "8 avenue du Pain, 51200 Épernay"
-  },
-  lignes: [
-    {
-      description: "Licence logiciel de gestion annuelle",
-      quantite: 1,
-      prix_unitaire: 890.00,
-      taux_tva: 20,
-      total_ht: 890.00
-    },
-    {
-      description: "Formation équipe (2 jours)",
-      quantite: 2,
-      prix_unitaire: 450.00,
-      taux_tva: 20,
-      total_ht: 900.00
-    },
-    {
-      description: "Support technique premium",
-      quantite: 1,
-      prix_unitaire: 150.00,
-      taux_tva: 20,
-      total_ht: 150.00
-    }
-  ],
-  totaux: {
-    ht: 1940.00,
-    tva: 388.00,
-    ttc: 2328.00
-  },
-  confiance: 93
-};
- 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ erreur: 'Méthode non autorisée' });
   }
- 
+
   try {
-    const form = new IncomingForm({
-      maxFileSize: 10 * 1024 * 1024,
-    });
- 
-    const [fields, files] = await new Promise((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        resolve([fields, files]);
-      });
-    });
- 
-    // Si pas de fichier, retourner l'exemple
-    if (!files.facture || !files.facture[0]) {
-      return res.status(200).json({
-        facture: EXEMPLE_FACTURE
-      });
+    const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({ erreur: 'Clé API manquante' });
     }
- 
-    // TODO: Implémenter l'extraction réelle avec Anthropic
-    // Pour l'instant, on retourne l'exemple
-    return res.status(200).json({
-      facture: EXEMPLE_FACTURE
+
+    let contenu = '';
+
+    if (req.body && req.body.texte) {
+      contenu = req.body.texte;
+    } else {
+      contenu = `FACTURE
+Numéro : FAC-2026-0147
+Date : 25/03/2026
+Échéance : 25/04/2026
+
+ÉMETTEUR :
+SARL Dupont Électricité
+SIRET : 52384716200023
+TVA : FR75523847162
+3 rue de l'Artisan, 67100 Strasbourg
+
+CLIENT :
+SCI Les Oliviers
+SIRET : 83921045600017
+12 rue des Lilas, 67000 Strasbourg
+
+PRESTATIONS :
+- Installation tableau électrique : 1 x 850,00 € HT
+- Fournitures et câblage : 1 x 320,00 € HT
+- Main d'oeuvre (8h) : 8 x 65,00 € HT
+
+Total HT : 1 690,00 €
+TVA 20% : 338,00 €
+Total TTC : 2 028,00 €`;
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: `Tu es un expert en facturation française et en format Factur-X.
+Analyse cette facture et extrais toutes les informations importantes.
+Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec cette structure exacte :
+
+{
+  "numero": "numéro de facture",
+  "date_emission": "YYYY-MM-DD",
+  "date_echeance": "YYYY-MM-DD",
+  "emetteur": {
+    "nom": "raison sociale",
+    "siret": "14 chiffres",
+    "tva": "numéro TVA",
+    "adresse": "adresse complète"
+  },
+  "client": {
+    "nom": "raison sociale",
+    "siret": "14 chiffres",
+    "adresse": "adresse complète"
+  },
+  "lignes": [
+    {
+      "description": "description",
+      "quantite": 1,
+      "prix_unitaire": 100.00,
+      "taux_tva": 20,
+      "total_ht": 100.00
+    }
+  ],
+  "totaux": {
+    "ht": 0.00,
+    "tva": 0.00,
+    "ttc": 0.00
+  },
+  "confiance": 95
+}
+
+Facture à analyser :
+${contenu}`
+        }]
+      })
     });
- 
+
+    const data = await response.json();
+
+    if (data.error) {
+      return res.status(500).json({ erreur: data.error.message });
+    }
+
+    const texteReponse = data.content[0].text.trim();
+
+    const jsonMatch = texteReponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return res.status(500).json({ erreur: 'Format de réponse invalide' });
+    }
+
+    const facture = JSON.parse(jsonMatch[0]);
+    return res.json({ succes: true, facture });
+
   } catch (error) {
-    console.error('Erreur API /analyser:', error);
-    return res.status(500).json({
-      erreur: error.message || 'Erreur lors de l\'analyse'
-    });
+    console.error('Erreur:', error);
+    return res.status(500).json({ erreur: error.message });
   }
 }
- 
