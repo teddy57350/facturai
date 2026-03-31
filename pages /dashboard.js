@@ -5,36 +5,59 @@ import { useRouter } from "next/router";
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    const getUser = async () => {
+    const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
 
       if (!data.user) {
         router.push("/login");
-      } else {
-        setUser(data.user);
+        return;
       }
+
+      setUser(data.user);
+      setIsOnline(true);
+      setLoading(false);
     };
 
-    getUser();
+    checkUser();
   }, []);
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+  const toggleSession = async () => {
+    if (isOnline) {
+      await supabase.auth.signOut();
+      setIsOnline(false);
+      router.push("/login");
+    } else {
+      router.push("/login");
+    }
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div style={{ padding: 40 }}>
-      <h1>Dashboard SaaS 🚀</h1>
+      <h1>Dashboard 🚀</h1>
 
-      <p>Email: {user.email}</p>
+      <p>Email : {user?.email}</p>
 
-      <button onClick={logout}>
-        Logout
+      {/* TOGGLE BUTTON */}
+      <button
+        onClick={toggleSession}
+        style={{
+          marginTop: 20,
+          padding: "10px 20px",
+          borderRadius: 10,
+          border: "none",
+          cursor: "pointer",
+          background: isOnline ? "green" : "red",
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
+        {isOnline ? "🟢 ON (Connecté)" : "🔴 OFF (Déconnecté)"}
       </button>
     </div>
   );
