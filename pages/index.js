@@ -34,37 +34,46 @@ export default function Home() {
     setStep(1);
   };
 
-  const handleGenerate = async () => {
-    if (!file) {
-      alert("Ajoute une facture");
-      return;
-    }
+const handleGenerate = async () => {
+  if (!file) {
+    alert("Ajoute une facture");
+    return;
+  }
 
-    setStep(2);
+  setStep(2);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      const res = await fetch("/api/invoice/convert", {
-        method: "POST",
-        body: formData,
-      });
+    const res = await fetch("/api/invoice/convert", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await res.json();
+    // ✅ IMPORTANT : on récupère un fichier
+    const blob = await res.blob();
 
-      console.log("RESULT IA:", data);
+    // ✅ création d’un lien de téléchargement
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "facture_facturx.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-      // ✅ incrément compteur gratuit
-      setFreeCount((prev) => prev + 1);
+    // compteur gratuit
+    setFreeCount((prev) => prev + 1);
 
-      setStep(3);
-    } catch (err) {
-      console.error(err);
-      alert("Erreur IA");
-      setStep(1);
-    }
-  };
+    setStep(3);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur IA");
+    setStep(1);
+  }
+};
 
   return (
     <>
