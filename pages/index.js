@@ -29,7 +29,7 @@ export default function Home() {
         body {
           margin: 0;
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          background: #f6f7fb;
+          background: radial-gradient(circle at top, #eef2ff, #f6f7fb);
         }
 
         .container {
@@ -42,8 +42,10 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           padding: 1rem 2rem;
-          background: white;
+          background: rgba(255,255,255,0.8);
+          backdrop-filter: blur(10px);
           border-bottom: 1px solid #eee;
+          border-radius: 12px;
         }
 
         .logo {
@@ -68,10 +70,17 @@ export default function Home() {
           color: white;
           border: none;
           padding: 12px 18px;
-          border-radius: 10px;
+          border-radius: 12px;
           cursor: pointer;
           font-weight: 600;
           margin-top: 10px;
+          transition: all 0.25s ease;
+          box-shadow: 0 10px 20px rgba(79,70,229,0.25);
+        }
+
+        .btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 15px 30px rgba(79,70,229,0.4);
         }
 
         .pricing {
@@ -84,19 +93,26 @@ export default function Home() {
         .plan {
           width: 280px;
           padding: 2rem;
-          border-radius: 14px;
+          border-radius: 16px;
           background: white;
           border: 1px solid #e5e7eb;
           text-align: center;
+          transition: transform 0.2s ease;
+        }
+
+        .plan:hover {
+          transform: scale(1.03);
         }
 
         .plan.pro {
-          background: #111827;
+          background: linear-gradient(135deg, #111827, #1f2937);
           color: white;
+          border: none;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
         .price {
-          font-size: 32px;
+          font-size: 34px;
           font-weight: 800;
           margin: 10px 0;
         }
@@ -104,13 +120,24 @@ export default function Home() {
         .card {
           background: white;
           padding: 1.5rem;
-          border-radius: 12px;
+          border-radius: 14px;
           margin-top: 20px;
           border: 1px solid #eee;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .glow {
+          animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+          from { box-shadow: 0 0 10px rgba(124,58,237,0.3); }
+          to { box-shadow: 0 0 25px rgba(79,70,229,0.6); }
         }
       `}</style>
 
       <div className="container">
+
         <header>
           <div className="logo">FacturX SaaS</div>
           <div className="badge">EN 16931</div>
@@ -120,14 +147,9 @@ export default function Home() {
           <h1>Factur-X automatique</h1>
           <p>IA + génération PDF/A-3 + XML embarqué</p>
 
-          {/* 🔥 FIX IMPORTANT */}
           <button
-            type="button"
-            className="btn"
-            onClick={() => {
-              console.log("STEP = 1");
-              setStep(1);
-            }}
+            className="btn glow"
+            onClick={() => setStep(1)}
           >
             Commencer
           </button>
@@ -142,14 +164,10 @@ export default function Home() {
               onChange={(e) => setFile(e.target.files[0])}
             />
 
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                if (!file) return alert("Ajoute une facture");
-                setStep(2);
-              }}
-            >
+            <button className="btn" onClick={() => {
+              if (!file) return alert("Ajoute une facture");
+              setStep(2);
+            }}>
               Continuer
             </button>
           </div>
@@ -159,11 +177,7 @@ export default function Home() {
           <div className="card">
             <h3>🔍 Analyse IA</h3>
 
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setStep(3)}
-            >
+            <button className="btn" onClick={() => setStep(3)}>
               Générer
             </button>
           </div>
@@ -173,46 +187,49 @@ export default function Home() {
           <div className="card">
             <h3>✅ Facture générée</h3>
 
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setStep(0)}
-            >
+            <button className="btn" onClick={() => setStep(0)}>
               Nouvelle facture
             </button>
           </div>
         )}
 
         <div className="pricing">
+
+          {/* FREE */}
           <div className="plan">
             <h3>Gratuit</h3>
             <div className="price">0€</div>
 
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                console.log("FREE");
-                setStep(1);
-              }}
-            >
+            <p>
+              ✔ 10 factures / mois<br />
+              ✔ Export Factur-X<br />
+              ✔ Support standard
+            </p>
+
+            <button className="btn" onClick={() => setStep(1)}>
               Commencer
             </button>
           </div>
 
+          {/* PRO */}
           <div className="plan pro">
             <h3>Pro</h3>
             <div className="price">19€</div>
 
-            <button
-              type="button"
-              className="btn"
-              onClick={handleCheckout}
-            >
+            <p>
+              ✔ Factures illimitées<br />
+              ✔ IA avancée<br />
+              ✔ Export premium<br />
+              ✔ Support prioritaire
+            </p>
+
+            <button className="btn" onClick={handleCheckout}>
               Passer Pro
             </button>
           </div>
+
         </div>
+
       </div>
     </>
   );
