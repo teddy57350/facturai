@@ -6,19 +6,9 @@ export default async function handler(req, res) {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card"],
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: "FacturX Pro",
-            },
-            unit_amount: 1900,
-            recurring: {
-              interval: "month",
-            },
-          },
+          price: price_1TGzLJLcn25N5LCHtJGUeLa4
           quantity: 1,
         },
       ],
@@ -26,8 +16,8 @@ export default async function handler(req, res) {
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
     });
 
-    res.status(200).json({ url: session.url });
+    return res.status(200).json({ url: session.url });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
