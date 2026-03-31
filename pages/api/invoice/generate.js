@@ -1,4 +1,3 @@
-// pages/api/generer.js
 const { genererFacturX } = require('../../src/lib/facturxGenerator');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 
