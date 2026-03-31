@@ -146,7 +146,7 @@ export default function Home() {
           <h1>Factur-X automatique</h1>
           <p>IA + génération PDF/A-3 + XML embarqué</p>
 
-          <button className="btn" onClick={() => setStep(1)}>
+         <button className="btn" onClick={() => alert("CLICK OK")}>
             🚀 Commencer
           </button>
         </div>
