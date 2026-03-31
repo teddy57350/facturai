@@ -162,48 +162,45 @@ export default function Home() {
         <div className="pricing">
 
           {/* FREE */}
-          <div className="plan">
-            <h3>Gratuit</h3>
-            <div className="price">0€</div>
+         <div className="pricing">
 
-            <p>
-              ✔ 10 factures / mois<br />
-              ✔ Export Factur-X<br />
-              ✔ Support standard
-            </p>
+  <div className="plan">
+    <h3>Gratuit</h3>
+    <div className="price">0€</div>
 
-            <button className="btn" onClick={() => alert("Plan Gratuit")}>
-              Commencer
-          <button
-  className="btn"
-  onClick={async () => {
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-      });
+    <button className="btn">
+      Commencer
+    </button>
+  </div>
 
-      const data = await res.json();
+  <div className="plan pro">
+    <h3>Pro</h3>
+    <div className="price">19€</div>
 
-      console.log("Stripe URL:", data.url); // debug
+    <button
+      type="button"
+      className="btn"
+      onClick={async () => {
+        try {
+          const res = await fetch("/api/stripe/checkout", {
+            method: "POST",
+          });
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Erreur: pas d'URL Stripe");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Erreur serveur");
-    }
-  }}
->
-  Passer Pro
-</button>
-          </div>
+          const data = await res.json();
 
-        </div>
+          if (data.url) {
+            window.location.assign(data.url);
+          } else {
+            alert("Erreur Stripe");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erreur serveur");
+        }
+      }}
+    >
+      Passer Pro
+    </button>
+  </div>
 
-      </div>
-    </>
-  );
-}
+</div>
