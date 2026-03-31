@@ -14,20 +14,38 @@ const anthropic = new Anthropic({
 });
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  try {
+    console.log("📩 API HIT");
 
-  const form = new formidable.IncomingForm();
+    const form = new formidable.IncomingForm();
 
-  form.parse(req, async (err, fields, files) => {
-    try {
-      const file = files.file;
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error("FORM ERROR", err);
+        return res.status(500).json({ error: "Form error" });
+      }
 
-      const dataBuffer = fs.readFileSync(file.filepath);
-      const pdfData = await pdfParse(dataBuffer);
+      console.log("FILES:", files);
+
+      const uploadedFile = files.file;
+
+      if (!uploadedFile) {
+        return res.status(400).json({ error: "No file received" });
+      }
+
+      const buffer = fs.readFileSync(uploadedFile.filepath);
+
+      const pdfData = await pdfParse(buffer);
 
       const text = pdfData.text;
+
+      console.log("PDF TEXT LENGTH:", text.length);
+
+      if (!text || text.length < 10) {
+        return res.status(400).json({
+          error: "PDF vide ou illisible",
+        });
+      }
 
       const message = await anthropic.messages.create({
         model: "claude-3-5-sonnet-20241022",
@@ -36,24 +54,13 @@ export default async function handler(req, res) {
           {
             role: "user",
             content: `
-Tu es une IA spécialisée en facturation européenne (Factur-X / EN16931).
+Tu es une IA de facturation.
 
-Analyse cette facture et retourne UNIQUEMENT un JSON valide :
+Analyse STRICTEMENT cette facture réelle :
 
-FACTURE:
 ${text}
 
-FORMAT:
-{
-  "supplier": "",
-  "customer": "",
-  "total": "",
-  "vat": "",
-  "date": "",
-  "items": [
-    { "name": "", "price": "" }
-  ]
-}
+Retourne UNIQUEMENT un JSON valide.
             `,
           },
         ],
@@ -61,13 +68,15 @@ FORMAT:
 
       const resultText = message.content[0].text;
 
+      console.log("IA RESPONSE:", resultText);
+
       res.status(200).json({
         success: true,
-        data: JSON.parse(resultText),
+        data: resultText,
       });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: "Claude IA error" });
-    }
-  });
+    });
+  } catch (e) {
+    console.error("GLOBAL ERROR", e);
+    res.status(500).json({ error: "Server error" });
+  }
 }
