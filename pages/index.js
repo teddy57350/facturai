@@ -79,6 +79,7 @@ export default function Home() {
           gap: 20px;
           justify-content: center;
           margin-top: 3rem;
+          flex-wrap: wrap;
         }
 
         .plan {
@@ -88,12 +89,12 @@ export default function Home() {
           background: white;
           border: 1px solid #e5e7eb;
           text-align: center;
+          position: relative;
         }
 
         .plan.pro {
           background: #111827;
           color: white;
-          position: relative;
         }
 
         .popular {
@@ -123,22 +124,24 @@ export default function Home() {
       `}</style>
 
       <div className="container">
+
+        {/* HEADER */}
         <header>
           <div className="logo">FacturX SaaS</div>
           <div className="badge">EN 16931</div>
         </header>
 
+        {/* HERO */}
         <div className="hero">
           <h1>Factur-X automatique</h1>
           <p>IA + génération PDF/A-3 + XML embarqué</p>
 
-          {/* ✅ BOUTON HERO */}
           <button className="btn" onClick={() => setStep(1)}>
             Commencer
           </button>
         </div>
 
-        {/* ✅ STEP UPLOAD */}
+        {/* STEP 1 - UPLOAD */}
         {step === 1 && (
           <div className="card">
             <h3>📄 Upload facture</h3>
@@ -147,8 +150,6 @@ export default function Home() {
               type="file"
               onChange={(e) => setFile(e.target.files[0])}
             />
-
-            <br />
 
             <button
               className="btn"
@@ -165,11 +166,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* ✅ STEP IA */}
+        {/* STEP 2 - IA */}
         {step === 2 && (
           <div className="card">
             <h3>🔍 Analyse IA</h3>
-            <p>Facture en cours de conversion Factur-X...</p>
+            <p>Conversion en cours vers Factur-X...</p>
 
             <button className="btn" onClick={() => setStep(3)}>
               Générer
@@ -177,7 +178,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* ✅ STEP RESULT */}
+        {/* STEP 3 - RESULT */}
         {step === 3 && (
           <div className="card">
             <h3>✅ Facture générée</h3>
@@ -191,6 +192,8 @@ export default function Home() {
 
         {/* PRICING */}
         <div className="pricing">
+
+          {/* FREE */}
           <div className="plan">
             <h3>Gratuit</h3>
             <div className="price">0€</div>
@@ -201,12 +204,12 @@ export default function Home() {
               ✔ Support standard
             </p>
 
-            {/* ✅ FIX BOUTON GRATUIT */}
             <button className="btn" onClick={() => setStep(1)}>
               Commencer
             </button>
           </div>
 
+          {/* PRO */}
           <div className="plan pro">
             <div className="popular">Populaire</div>
 
@@ -220,15 +223,13 @@ export default function Home() {
               ✔ Support prioritaire
             </p>
 
-            <button
-              type="button"
-              className="btn"
-              onClick={handleCheckout}
-            >
+            <button className="btn" onClick={handleCheckout}>
               Passer Pro
             </button>
           </div>
+
         </div>
+
       </div>
     </>
   );
