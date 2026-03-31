@@ -34,25 +34,37 @@ export default function Home() {
     setStep(1);
   };
 
-const handleGenerate = async () => {
-  if (!file) return alert("Ajoute une facture");
+  const handleGenerate = async () => {
+    if (!file) {
+      alert("Ajoute une facture");
+      return;
+    }
 
-  setStep(2);
+    setStep(2);
 
-  const formData = new FormData();
-  formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-  const res = await fetch("/api/analyze-invoice", {
-    method: "POST",
-    body: formData,
-  });
+      const res = await fetch("/api/invoice/convert", {
+        method: "POST",
+        body: formData,
+      });
 
-  const data = await res.json();
+      const data = await res.json();
 
-  console.log("IA RESULT:", data);
+      console.log("RESULT IA:", data);
 
-  setStep(3);
-};
+      // ✅ incrément compteur gratuit
+      setFreeCount((prev) => prev + 1);
+
+      setStep(3);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur IA");
+      setStep(1);
+    }
+  };
 
   return (
     <>
@@ -129,17 +141,11 @@ const handleGenerate = async () => {
           background: white;
           border: 1px solid #e5e7eb;
           text-align: center;
-          transition: transform 0.2s ease;
-        }
-
-        .plan:hover {
-          transform: scale(1.03);
         }
 
         .plan.pro {
           background: linear-gradient(135deg, #111827, #1f2937);
           color: white;
-          border: none;
         }
 
         .price {
@@ -154,18 +160,15 @@ const handleGenerate = async () => {
           border-radius: 14px;
           margin-top: 20px;
           border: 1px solid #eee;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         .counter {
           margin-top: 10px;
           font-size: 14px;
-          color: #555;
         }
       `}</style>
 
       <div className="container">
-
         <header>
           <div className="logo">FacturX SaaS 🚀</div>
           <div className="badge">EN 16931</div>
@@ -180,10 +183,11 @@ const handleGenerate = async () => {
           </button>
 
           <div className="counter">
-            Factures gratuites utilisées : {freeCount} / {FREE_LIMIT}
+            {freeCount} / {FREE_LIMIT} factures gratuites utilisées
           </div>
         </div>
 
+        {/* STEP 1 */}
         {step === 1 && (
           <div className="card">
             <h3>📄 Upload facture</h3>
@@ -193,28 +197,27 @@ const handleGenerate = async () => {
               onChange={(e) => setFile(e.target.files[0])}
             />
 
-            <button className="btn" onClick={() => {
-              if (!file) return alert("Ajoute une facture");
-              setStep(2);
-            }}>
-              Continuer
-            </button>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="card">
-            <h3>🔍 Analyse IA</h3>
+            <br />
 
             <button className="btn" onClick={handleGenerate}>
-              Générer
+              Générer →
             </button>
           </div>
         )}
 
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div className="card">
+            <h3>🔍 Analyse IA en cours...</h3>
+            <p>Extraction des données + conversion Factur-X</p>
+          </div>
+        )}
+
+        {/* STEP 3 */}
         {step === 3 && (
           <div className="card">
             <h3>✅ Facture générée</h3>
+            <p>Format Factur-X prêt</p>
 
             <button className="btn" onClick={() => setStep(0)}>
               Nouvelle facture
@@ -222,9 +225,8 @@ const handleGenerate = async () => {
           </div>
         )}
 
+        {/* PRICING */}
         <div className="pricing">
-
-          {/* FREE */}
           <div className="plan">
             <h3>Gratuit</h3>
             <div className="price">0€</div>
@@ -240,7 +242,6 @@ const handleGenerate = async () => {
             </button>
           </div>
 
-          {/* PRO */}
           <div className="plan pro">
             <h3>Pro</h3>
             <div className="price">19€</div>
@@ -256,9 +257,7 @@ const handleGenerate = async () => {
               Passer Pro
             </button>
           </div>
-
         </div>
-
       </div>
     </>
   );
