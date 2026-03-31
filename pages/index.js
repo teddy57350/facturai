@@ -3,6 +3,9 @@ import { useState } from "react";
 export default function Home() {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState(null);
+  const [freeCount, setFreeCount] = useState(0);
+
+  const FREE_LIMIT = 10;
 
   const handleCheckout = async () => {
     try {
@@ -23,13 +26,31 @@ export default function Home() {
     }
   };
 
+  const handleFreeStart = () => {
+    if (freeCount >= FREE_LIMIT) {
+      alert("Limite gratuite atteinte (10 factures). Passe en Pro 🚀");
+      return;
+    }
+    setStep(1);
+  };
+
+  const handleGenerate = () => {
+    if (freeCount >= FREE_LIMIT) {
+      alert("Limite gratuite atteinte 🚫");
+      return;
+    }
+    setFreeCount(freeCount + 1);
+    setStep(3);
+  };
+
   return (
     <>
       <style jsx global>{`
         body {
           margin: 0;
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          background: radial-gradient(circle at top, #eef2ff, #f6f7fb);
+          background: radial-gradient(circle at top, #a5f3fc, #f0fdf4, #eef2ff);
+          min-height: 100vh;
         }
 
         .container {
@@ -42,10 +63,10 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           padding: 1rem 2rem;
-          background: rgba(255,255,255,0.8);
-          backdrop-filter: blur(10px);
-          border-bottom: 1px solid #eee;
-          border-radius: 12px;
+          background: rgba(255,255,255,0.7);
+          backdrop-filter: blur(12px);
+          border-radius: 14px;
+          border: 1px solid #e5e7eb;
         }
 
         .logo {
@@ -53,7 +74,7 @@ export default function Home() {
         }
 
         .badge {
-          background: #e8fff1;
+          background: #dcfce7;
           color: #166534;
           padding: 4px 10px;
           border-radius: 20px;
@@ -75,12 +96,12 @@ export default function Home() {
           font-weight: 600;
           margin-top: 10px;
           transition: all 0.25s ease;
-          box-shadow: 0 10px 20px rgba(79,70,229,0.25);
+          box-shadow: 0 10px 25px rgba(79,70,229,0.25);
         }
 
         .btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 15px 30px rgba(79,70,229,0.4);
+          box-shadow: 0 15px 35px rgba(79,70,229,0.4);
         }
 
         .pricing {
@@ -108,7 +129,6 @@ export default function Home() {
           background: linear-gradient(135deg, #111827, #1f2937);
           color: white;
           border: none;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
         .price {
@@ -126,33 +146,31 @@ export default function Home() {
           box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
-        .glow {
-          animation: glow 2s infinite alternate;
-        }
-
-        @keyframes glow {
-          from { box-shadow: 0 0 10px rgba(124,58,237,0.3); }
-          to { box-shadow: 0 0 25px rgba(79,70,229,0.6); }
+        .counter {
+          margin-top: 10px;
+          font-size: 14px;
+          color: #555;
         }
       `}</style>
 
       <div className="container">
 
         <header>
-          <div className="logo">FacturX SaaS</div>
+          <div className="logo">FacturX SaaS 🚀</div>
           <div className="badge">EN 16931</div>
         </header>
 
         <div className="hero">
-          <h1>Factur-X automatique</h1>
+          <h1>Factur-X automatique ✨</h1>
           <p>IA + génération PDF/A-3 + XML embarqué</p>
 
-          <button
-            className="btn glow"
-            onClick={() => setStep(1)}
-          >
+          <button className="btn" onClick={handleFreeStart}>
             Commencer
           </button>
+
+          <div className="counter">
+            Factures gratuites utilisées : {freeCount} / {FREE_LIMIT}
+          </div>
         </div>
 
         {step === 1 && (
@@ -177,7 +195,7 @@ export default function Home() {
           <div className="card">
             <h3>🔍 Analyse IA</h3>
 
-            <button className="btn" onClick={() => setStep(3)}>
+            <button className="btn" onClick={handleGenerate}>
               Générer
             </button>
           </div>
@@ -206,7 +224,7 @@ export default function Home() {
               ✔ Support standard
             </p>
 
-            <button className="btn" onClick={() => setStep(1)}>
+            <button className="btn" onClick={handleFreeStart}>
               Commencer
             </button>
           </div>
@@ -234,3 +252,4 @@ export default function Home() {
     </>
   );
 }
+🎯 CE QUE TU AS MAINTENANT
