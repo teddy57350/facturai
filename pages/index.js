@@ -1,30 +1,92 @@
-import { useState } from "react";
+const handleFreeStart = () => {
+  if (freeCount >= FREE_LIMIT) {
+    alert("Limite gratuite atteinte (10 factures). Passe en Pro 🚀");
+    return;
+  }
+  setStep(1);
+};
 
-export default function Home() {
-  const [step, setStep] = useState(0);
-  const [file, setFile] = useState(null);
-  const [freeCount, setFreeCount] = useState(0);
+const handleGenerate = async () => {
+  if (!file) {
+    alert("Ajoute une facture");
+    return;
+  }
 
-  const FREE_LIMIT = 10;
+  setStep(2);
 
-  const handleCheckout = async () => {
+  try {
+    // 🔵 1. IA (convert PDF → JSON facture)
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/invoice/convert", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    let facture;
     try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.assign(data.url);
-      } else {
-        alert("Erreur Stripe");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Erreur serveur");
+      facture = JSON.parse(data.ai);
+    } catch {
+      facture = data.ai;
     }
-  };
+
+    // 🟢 2. GENERATION PDF
+    const res2 = await fetch("/api/invoice/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ facture }),
+    });
+
+    const blob = await res2.blob();
+
+    // 📥 DOWNLOAD
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "facture_facturx.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setFreeCount((prev) => prev + 1);
+    setStep(3);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur génération facture");
+    setStep(1);
+  }
+};
+    // 2. PDF
+    const res2 = await fetch("/api/invoice/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ facture }),
+    });
+
+    const blob = await res2.blob();
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "facture.pdf";
+    a.click();
+
+    setStep(0);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur génération facture");
+    setStep(0);
+  }
+};
 
   const handleFreeStart = () => {
     if (freeCount >= FREE_LIMIT) {
@@ -228,8 +290,8 @@ const handleGenerate = async () => {
             <h3>✅ Facture générée</h3>
             <p>Format Factur-X prêt</p>
 
-            <button className="btn" onClick={() => setStep(0)}>
-              Nouvelle facture
+            <button className="btn" onClick={handleSaaSGenerate}>
+           🚀 Générer ma facture
             </button>
           </div>
         )}
