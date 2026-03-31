@@ -272,61 +272,36 @@ export default function Home() {
 export default function Home() {
 
   const handleCheckout = async () => {
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-      });
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      console.log(data);
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Erreur Stripe");
-      }
-    } catch (err) {
-      console.error(err);
+    if (data.url) {
+      window.location.href = data.url;
     }
   };
 
   return (
-    <>
-      <div className="pricing">
+    <div className="pricing">
 
-        <div className="plan">
-          <h3>Gratuit</h3>
-          <div className="price">0€</div>
+      <div className="plan">
+        <h3>Gratuit</h3>
+        <div className="price">0€</div>
 
-          <p>
-            ✔ 10 factures / mois<br />
-            ✔ Export Factur-X<br />
-            ✔ Support standard
-          </p>
-
-          <button className="btn">
-            Commencer
-          </button>
-        </div>
-
-        <div className="plan pro">
-          <h3>Pro</h3>
-          <div className="price">19€</div>
-
-          <p>
-            ✔ Factures illimitées<br />
-            ✔ IA avancée<br />
-            ✔ Export premium<br />
-            ✔ Support prioritaire
-          </p>
-
-          <button className="btn" onClick={handleCheckout}>
-            Passer Pro
-          </button>
-        </div>
-
+        <button>Commencer</button>
       </div>
-    </>
+
+      <div className="plan pro">
+        <h3>Pro</h3>
+        <div className="price">19€</div>
+
+        <button className="btn" onClick={handleCheckout}>
+          Passer Pro
+        </button>
+      </div>
+
+    </div>
   );
 }
