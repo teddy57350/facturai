@@ -271,7 +271,7 @@ export default function Home() {
 
 export default function Home() {
 
-  const handleCheckout = useCallback(async () => {
+  const handleCheckout = async () => {
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -279,24 +279,22 @@ export default function Home() {
 
       const data = await res.json();
 
-      console.log("Stripe response:", data);
+      console.log(data);
 
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Erreur Stripe : pas d'URL");
+        alert("Erreur Stripe");
       }
-    } catch (error) {
-      console.error("Stripe error:", error);
-      alert("Erreur lors du paiement");
+    } catch (err) {
+      console.error(err);
     }
-  }, []);
+  };
 
   return (
     <>
       <div className="pricing">
 
-        {/* FREE */}
         <div className="plan">
           <h3>Gratuit</h3>
           <div className="price">0€</div>
@@ -307,15 +305,11 @@ export default function Home() {
             ✔ Support standard
           </p>
 
-          <button
-            className="btn"
-            onClick={() => alert("Plan Gratuit activé")}
-          >
+          <button className="btn">
             Commencer
           </button>
         </div>
 
-        {/* PRO */}
         <div className="plan pro">
           <h3>Pro</h3>
           <div className="price">19€</div>
