@@ -34,14 +34,25 @@ export default function Home() {
     setStep(1);
   };
 
-  const handleGenerate = () => {
-    if (freeCount >= FREE_LIMIT) {
-      alert("Limite gratuite atteinte 🚫");
-      return;
-    }
-    setFreeCount(freeCount + 1);
-    setStep(3);
-  };
+const handleGenerate = async () => {
+  if (!file) return alert("Ajoute une facture");
+
+  setStep(2);
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/analyze-invoice", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  console.log("IA RESULT:", data);
+
+  setStep(3);
+};
 
   return (
     <>
