@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [tab, setTab] = useState("home");
+  const [step, setStep] = useState(0);
+  const [file, setFile] = useState(null);
 
   const handleCheckout = async () => {
     try {
@@ -27,150 +28,191 @@ export default function Home() {
       <style jsx global>{`
         body {
           margin: 0;
-          font-family: Arial;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f6f7fb;
         }
 
         .container {
           max-width: 1000px;
           margin: auto;
-          padding: 20px;
+          padding: 2rem;
         }
 
         header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          padding: 1rem 2rem;
           background: white;
-          padding: 15px 20px;
           border-bottom: 1px solid #eee;
         }
 
         .logo {
-          font-weight: bold;
+          font-weight: 900;
         }
 
-        .tabs {
-          display: flex;
-          gap: 10px;
+        .badge {
+          background: #e8fff1;
+          color: #166534;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 12px;
         }
 
-        .tab {
-          padding: 8px 12px;
-          border-radius: 8px;
-          cursor: pointer;
-          background: #eee;
-          font-size: 14px;
-        }
-
-        .tab.active {
-          background: #4f46e5;
-          color: white;
-        }
-
-        .card {
-          background: white;
-          padding: 20px;
-          border-radius: 10px;
-          margin-top: 20px;
+        .hero {
+          text-align: center;
+          margin: 2rem 0;
         }
 
         .btn {
-          padding: 10px 15px;
-          background: #4f46e5;
+          background: linear-gradient(135deg, #7c3aed, #4f46e5);
           color: white;
           border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          margin-top: 10px;
-        }
-
-        .plan {
-          border: 1px solid #ddd;
-          padding: 15px;
+          padding: 12px 18px;
           border-radius: 10px;
-          width: 250px;
+          cursor: pointer;
+          font-weight: 600;
+          margin-top: 10px;
         }
 
         .pricing {
           display: flex;
           gap: 20px;
-          margin-top: 30px;
+          justify-content: center;
+          margin-top: 3rem;
+        }
+
+        .plan {
+          width: 280px;
+          padding: 2rem;
+          border-radius: 14px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          text-align: center;
+        }
+
+        .plan.pro {
+          background: #111827;
+          color: white;
+        }
+
+        .price {
+          font-size: 32px;
+          font-weight: 800;
+          margin: 10px 0;
+        }
+
+        .card {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          margin-top: 20px;
+          border: 1px solid #eee;
         }
       `}</style>
 
       <div className="container">
-
-        {/* HEADER */}
         <header>
-          <div className="logo">FacturX SaaS 🚀</div>
-
-          <div className="tabs">
-            <div
-              className={`tab ${tab === "home" ? "active" : ""}`}
-              onClick={() => setTab("home")}
-            >
-              🚀 Commencer
-            </div>
-
-            <div
-              className={`tab ${tab === "auth" ? "active" : ""}`}
-              onClick={() => setTab("auth")}
-            >
-              👤 Connexion
-            </div>
-          </div>
+          <div className="logo">FacturX SaaS</div>
+          <div className="badge">EN 16931</div>
         </header>
 
-        {/* HOME */}
-        {tab === "home" && (
-          <>
-            <div className="card">
-              <h1>Factur-X automatique</h1>
-              <p>Conversion facture → PDF/A-3 + XML (EN 16931)</p>
+        <div className="hero">
+          <h1>Factur-X automatique</h1>
+          <p>IA + génération PDF/A-3 + XML embarqué</p>
 
-              <button className="btn" onClick={() => alert("Upload bientôt")}>
-                Upload facture
-              </button>
-            </div>
+          {/* 🔥 FIX IMPORTANT */}
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              console.log("STEP = 1");
+              setStep(1);
+            }}
+          >
+            Commencer
+          </button>
+        </div>
 
-            {/* PRICING */}
-            <div className="pricing">
-
-              <div className="plan">
-                <h3>Gratuit</h3>
-                <p>10 factures / mois</p>
-                <button className="btn" onClick={() => alert("Free activé")}>
-                  Commencer
-                </button>
-              </div>
-
-              <div className="plan">
-                <h3>Pro</h3>
-                <p>Illimité</p>
-                <button className="btn" onClick={handleCheckout}>
-                  Passer Pro
-                </button>
-              </div>
-
-            </div>
-          </>
-        )}
-
-        {/* AUTH */}
-        {tab === "auth" && (
+        {step === 1 && (
           <div className="card">
-            <h2>Connexion / Inscription</h2>
+            <h3>📄 Upload facture</h3>
 
-            <input placeholder="Email" style={{ width: "100%", padding: 10, marginTop: 10 }} />
-            <input placeholder="Mot de passe" type="password" style={{ width: "100%", padding: 10, marginTop: 10 }} />
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
 
-            <button className="btn">
-              Se connecter
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                if (!file) return alert("Ajoute une facture");
+                setStep(2);
+              }}
+            >
+              Continuer
             </button>
           </div>
         )}
 
+        {step === 2 && (
+          <div className="card">
+            <h3>🔍 Analyse IA</h3>
+
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setStep(3)}
+            >
+              Générer
+            </button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="card">
+            <h3>✅ Facture générée</h3>
+
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setStep(0)}
+            >
+              Nouvelle facture
+            </button>
+          </div>
+        )}
+
+        <div className="pricing">
+          <div className="plan">
+            <h3>Gratuit</h3>
+            <div className="price">0€</div>
+
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                console.log("FREE");
+                setStep(1);
+              }}
+            >
+              Commencer
+            </button>
+          </div>
+
+          <div className="plan pro">
+            <h3>Pro</h3>
+            <div className="price">19€</div>
+
+            <button
+              type="button"
+              className="btn"
+              onClick={handleCheckout}
+            >
+              Passer Pro
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
