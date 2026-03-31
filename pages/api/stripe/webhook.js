@@ -13,18 +13,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const buf = await buffer(req);
   const sig = req.headers["stripe-signature"];
 
   let event;
 
   try {
+    const rawBody = await buffer(req);
+
     event = stripe.webhooks.constructEvent(
-      buf.toString(),
+      rawBody.toString(),
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
+    console.log("Webhook error:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -34,12 +36,19 @@ export default async function handler(req, res) {
 
     const email = session.customer_details?.email;
 
-    if (!email) return res.status(400).json({ error: "no email" });
+    if (!email) {
+      return res.status(400).json({ error: "No email found" });
+    }
 
-    await supabase
+    // 🔥 upgrade user en PRO
+    const { error } = await supabase
       .from("users")
       .update({ plan: "pro" })
       .eq("email", email);
+
+    if (error) {
+      console.log("Supabase error:", error.message);
+    }
   }
 
   res.json({ received: true });
