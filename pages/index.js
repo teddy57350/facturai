@@ -7,131 +7,39 @@ export default function Home() {
   return (
     <>
       {/* GLOBAL STYLE */}
-      <style jsx global>{`
-        body {
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          background: #f6f7fb;
-        }
+<style jsx global>{`
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f6f7fb;
+  }
 
-        .container {
-          max-width: 1000px;
-          margin: auto;
-          padding: 2rem;
-        }
+  .container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 2rem;
+  }
 
-        header {
-          display: flex;
-          justify-content: space-between;
-          padding: 1rem 2rem;
-          background: white;
-          border-bottom: 1px solid #eee;
-        }
+  header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #eee;
+  }
 
-        .logo {
-          font-weight: 900;
-        }
+  .logo {
+    font-weight: 900;
+  }
 
-        .badge {
-          background: #e8fff1;
-          color: #166534;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 12px;
-        }
-
-        .hero {
-          text-align: center;
-          margin: 2rem 0;
-        }
-
-        .btn {
-          background: linear-gradient(135deg, #7c3aed, #4f46e5);
-          color: white;
-          border: none;
-          padding: 12px 18px;
-          border-radius: 10px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-
-        .steps {
-          display: flex;
-          border-radius: 10px;
-          overflow: hidden;
-          border: 1px solid #ddd;
-          margin: 2rem 0;
-        }
-
-        .step {
-          flex: 1;
-          padding: 10px;
-          text-align: center;
-          background: #f1f1f1;
-          font-size: 13px;
-        }
-
-        .step.active {
-          background: #4f46e5;
-          color: white;
-        }
-
-        .card {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          border: 1px solid #eee;
-          margin-top: 1rem;
-        }
-
-        .pricing {
-          display: flex;
-          gap: 20px;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin-top: 3rem;
-        }
-
-        .plan {
-          width: 300px;
-          padding: 2rem;
-          border-radius: 14px;
-          background: white;
-          border: 1px solid #e5e7eb;
-          text-align: center;
-        }
-
-        .plan.pro {
-          background: #111827;
-          color: white;
-          transform: scale(1.05);
-        }
-
-        .price {
-          font-size: 32px;
-          font-weight: 800;
-          margin: 10px 0;
-        }
-
-        .invoice {
-          margin-top: 3rem;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 2rem;
-        }
-
-        .htmlBox {
-          margin-top: 2rem;
-          background: #0f172a;
-          color: #22c55e;
-          padding: 1rem;
-          border-radius: 10px;
-          font-size: 12px;
-          overflow-x: auto;
-          white-space: pre-wrap;
-        }
-      `}</style>
+  .badge {
+    background: #e8fff1;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+`}</style>
 
       {/* HEADER */}
       <header>
