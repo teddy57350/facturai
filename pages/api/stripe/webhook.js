@@ -1,6 +1,5 @@
 import Stripe from "stripe";
-import { buffer } from "micro";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../../lib/supabase";
 
 export const config = {
   api: {
