@@ -14,7 +14,9 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   : null;
 
 
-console.log("KEY PREFIX:", process.env.ANTHROPIC_API_KEY?.slice(0, 7));
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
   }
 
 const form = new IncomingForm();
