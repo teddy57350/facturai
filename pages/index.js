@@ -146,12 +146,28 @@ const handleCheckout = async () => {
         }
 
         .card {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 14px;
-          margin-top: 20px;
-          border: 1px solid #eee;
-        }
+  background: white;
+  padding: 1.5rem;
+  border-radius: 14px;
+  margin-top: 20px;
+  border: 1px solid #eee;
+}
+
+/* FILIGRANE */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
+  transform: translate(-50%, -50%);
+  background: url("/watermark.png") no-repeat center;
+  background-size: contain;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
       `}</style>
 
       <div className="container">
