@@ -1,9 +1,6 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
 
 export default function Home() {
-  const router = useRouter();
-
   const [file, setFile] = useState(null);
   const [step, setStep] = useState(0);
   const [freeCount, setFreeCount] = useState(0);
@@ -37,6 +34,10 @@ export default function Home() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur analyse facture");
+      }
+
       let facture;
       try {
         facture = JSON.parse(data.ai);
@@ -52,6 +53,11 @@ export default function Home() {
         body: JSON.stringify({ facture }),
       });
 
+      if (!res2.ok) {
+        const err2 = await res2.json().catch(() => ({}));
+        throw new Error(err2.error || "Erreur génération PDF");
+      }
+
       const blob = await res2.blob();
 
       const url = window.URL.createObjectURL(blob);
@@ -66,7 +72,7 @@ export default function Home() {
       setStep(3);
     } catch (err) {
       console.error(err);
-      alert("Erreur génération facture");
+      alert(err.message || "Erreur génération facture");
       setStep(0);
     }
   };
@@ -100,6 +106,29 @@ export default function Home() {
           min-height: 100vh;
         }
 
+        body::before {
+          content: "";
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          width: 500px;
+          height: 500px;
+          transform: translate(-50%, -50%);
+          background: url("/watermark.png") no-repeat center;
+          background-size: contain;
+          opacity: 0.05;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .container {
+          max-width: 1100px;
+          margin: auto;
+          padding: 2rem;
+          position: relative;
+          z-index: 1;
+        }
+
         header {
           display: flex;
           justify-content: space-between;
@@ -112,6 +141,7 @@ export default function Home() {
 
         .logo {
           font-weight: 900;
+          font-size: 16px;
         }
 
         .badge {
@@ -124,7 +154,25 @@ export default function Home() {
 
         .hero {
           text-align: center;
-          margin: 2rem 0;
+          margin: 2.5rem 0 1.5rem;
+        }
+
+        .hero h1 {
+          font-size: 56px;
+          margin: 0 0 10px;
+          color: #0f172a;
+        }
+
+        .hero p {
+          font-size: 17px;
+          color: #334155;
+          margin: 0 0 20px;
+        }
+
+        .counter {
+          margin-top: 10px;
+          font-size: 14px;
+          color: #111827;
         }
 
         .btn {
@@ -146,54 +194,146 @@ export default function Home() {
           border: 1px solid #eee;
         }
 
+        .card h3 {
+          margin-top: 0;
+          color: #111827;
+        }
+
+        .uploadBox {
+          margin-top: 10px;
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .pricingSection {
+          padding: 40px 0 20px;
+        }
+
+        .pricingTitle {
+          text-align: center;
+          font-size: 52px;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0;
+        }
+
+        .pricingSubtitle {
+          text-align: center;
+          color: #64748b;
+          margin-top: 12px;
+          margin-bottom: 30px;
+          font-size: 16px;
+        }
+
         .pricing {
           display: flex;
-          gap: 20px;
+          gap: 28px;
           justify-content: center;
-          margin-top: 3rem;
+          flex-wrap: wrap;
         }
 
         .plan {
-          width: 280px;
-          padding: 2rem;
-          border-radius: 16px;
-          background: white;
-          border: 1px solid #e5e7eb;
-          text-align: center;
+          width: 360px;
+          padding: 2.2rem;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.75);
+          border: 1px solid #d1d5db;
+          text-align: left;
+          position: relative;
+          box-sizing: border-box;
         }
 
         .plan.pro {
-          background: linear-gradient(135deg, #111827, #1f2937);
+          border: 2px solid #2563eb;
+          background: rgba(255, 255, 255, 0.82);
+        }
+
+        .popular {
+          position: absolute;
+          top: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #2563eb;
           color: white;
+          border-radius: 999px;
+          padding: 4px 14px;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .plan h3 {
+          margin: 20px 0 18px;
+          font-size: 22px;
+          color: #0f172a;
+        }
+
+        .priceRow {
+          display: flex;
+          align-items: baseline;
+          gap: 8px;
+          margin-bottom: 6px;
         }
 
         .price {
-          font-size: 34px;
+          font-size: 50px;
           font-weight: 800;
-          margin: 10px 0;
+          color: #0f172a;
+          line-height: 1;
         }
 
-        body::before {
-          content: "";
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          width: 500px;
-          height: 500px;
-          transform: translate(-50%, -50%);
-          background: url("/watermark.png") no-repeat center;
-          background-size: contain;
-          opacity: 0.05;
-          pointer-events: none;
-          z-index: 0;
+        .per {
+          color: #64748b;
+          font-size: 18px;
         }
 
-        .container {
-          max-width: 1000px;
-          margin: auto;
-          padding: 2rem;
-          position: relative;
-          z-index: 1;
+        .underPrice {
+          color: #64748b;
+          font-size: 16px;
+          margin-bottom: 28px;
+        }
+
+        .features {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          color: #334155;
+          font-size: 15px;
+          margin-bottom: 26px;
+        }
+
+        .feature {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .check {
+          color: #16a34a;
+          font-weight: 700;
+          font-size: 18px;
+        }
+
+        .planButton {
+          width: 100%;
+          border-radius: 12px;
+          padding: 14px 18px;
+          font-weight: 700;
+          font-size: 15px;
+          cursor: pointer;
+        }
+
+        .planButton.free {
+          background: white;
+          border: 2px solid #d1d5db;
+          color: #0f172a;
+        }
+
+        .planButton.pro {
+          background: #2563eb;
+          border: none;
+          color: white;
         }
       `}</style>
 
@@ -211,7 +351,7 @@ export default function Home() {
             Commencer
           </button>
 
-          <div>
+          <div className="counter">
             {freeCount} / {FREE_LIMIT} factures gratuites
           </div>
         </div>
@@ -219,46 +359,126 @@ export default function Home() {
         {step === 1 && (
           <div className="card">
             <h3>📄 Upload facture</h3>
-            <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-            <button className="btn" onClick={handleGenerate}>
-              Générer →
-            </button>
+            <div className="uploadBox">
+              <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+              <button className="btn" onClick={handleGenerate}>
+                Générer →
+              </button>
+            </div>
           </div>
         )}
 
         {step === 2 && (
           <div className="card">
             <h3>🔍 Analyse IA en cours...</h3>
+            <p>Extraction des données + conversion Factur-X</p>
           </div>
         )}
 
         {step === 3 && (
           <div className="card">
             <h3>✅ Facture générée</h3>
+            <p>Format Factur-X prêt</p>
             <button className="btn" onClick={handleGenerate}>
               Générer encore
             </button>
           </div>
         )}
 
-        <div className="pricing">
-          <div className="plan">
-            <h3>Gratuit</h3>
-            <div className="price">0€</div>
-            <p>10 factures</p>
-            <button className="btn" onClick={handleFreeStart}>
-              Start
-            </button>
-          </div>
+        <section className="pricingSection">
+          <h2 className="pricingTitle">Choisissez votre plan</h2>
+          <p className="pricingSubtitle">
+            Factures illimitées ou essayez gratuitement
+          </p>
 
-          <div className="plan pro">
-            <h3>Pro</h3>
-            <div className="price">19€/mois</div>
-            <button className="btn" onClick={handleCheckout}>
-              Passer Pro
-            </button>
+          <div className="pricing">
+            <div className="plan">
+              <h3>Gratuit</h3>
+
+              <div className="priceRow">
+                <div className="price">0€</div>
+                <div className="per">/ mois</div>
+              </div>
+
+              <div className="underPrice">Pour tester Facturly</div>
+
+              <div className="features">
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>10 factures par mois</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Extraction automatique par IA</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Génération XML Factur-X</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Conforme EN 16931</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Support par email</span>
+                </div>
+              </div>
+
+              <button className="planButton free" onClick={handleFreeStart}>
+                Commencer gratuitement
+              </button>
+            </div>
+
+            <div className="plan pro">
+              <div className="popular">POPULAIRE</div>
+
+              <h3>Plan Pro</h3>
+
+              <div className="priceRow">
+                <div className="price">19€</div>
+                <div className="per">/ mois</div>
+              </div>
+
+              <div className="underPrice">Pour les professionnels</div>
+
+              <div className="features">
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Factures illimitées</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Extraction automatique par IA</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Génération XML Factur-X</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Conforme EN 16931</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Support prioritaire</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Historique complet</span>
+                </div>
+                <div className="feature">
+                  <span className="check">✓</span>
+                  <span>Accès API</span>
+                </div>
+              </div>
+
+              <button className="planButton pro" onClick={handleCheckout}>
+                Passer au Pro
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </>
   );
