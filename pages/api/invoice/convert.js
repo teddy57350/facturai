@@ -13,17 +13,17 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   : null;
 
-
-const anthropic = process.env.ANTHROPIC_API_KEY
-  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  : null;
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-const form = new IncomingForm();
+  const form = new IncomingForm();
 
   form.parse(req, async (err, fields, files) => {
     try {
       if (err) {
+        console.error("Formidable error:", err);
         return res.status(500).json({ error: "Upload error" });
       }
 
@@ -39,13 +39,14 @@ const form = new IncomingForm();
       try {
         const pdf = await pdfParse(buffer);
         text = (pdf.text || "").trim();
-      } catch (e) {
-        console.error("pdf-parse error:", e);
+      } catch (parseError) {
+        console.error("pdf-parse error:", parseError);
+        return res.status(500).json({ error: "Erreur lecture PDF" });
       }
 
       if (!text || text.length < 20) {
         return res.status(400).json({
-          error: "Le PDF ne contient pas assez de texte lisible. PDF scanné ou image non gérée.",
+          error: "Le PDF ne contient pas assez de texte lisible.",
         });
       }
 
@@ -80,7 +81,7 @@ ${text}
         ],
       });
 
-      const raw = response.content[0].text.trim();
+      const raw = response.content?.[0]?.text?.trim() || "";
 
       const cleaned = raw
         .replace(/^```json\s*/i, "")
@@ -91,7 +92,7 @@ ${text}
       let facture;
       try {
         facture = JSON.parse(cleaned);
-      } catch (e) {
+      } catch (jsonError) {
         console.error("JSON parse IA error:", cleaned);
         return res.status(500).json({
           error: "Réponse IA invalide",
