@@ -167,6 +167,10 @@ body::before {
   opacity: 0.05;
   pointer-events: none;
   z-index: 0;
+  
+  .container {
+  position: relative;
+  z-index: 1;
 }
       `}</style>
 
