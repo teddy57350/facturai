@@ -1,98 +1,21 @@
-import formidable from "formidable";
-import fs from "fs";
-import pdfParse from "pdf-parse";
-import Anthropic from "@anthropic-ai/sdk";
-import Tesseract from "tesseract.js";
-
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const form = new formidable.IncomingForm();
-
-  form.parse(req, async (err, fields, files) => {
-    try {
-      if (err) {
-        return res.status(500).json({ error: "Upload error" });
-      }
-
-      const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
-      if (!uploadedFile) {
-        return res.status(400).json({ error: "Aucun fichier reçu" });
-      }
-
-      const buffer = fs.readFileSync(uploadedFile.filepath);
-
-      let text = "";
-
-      try {
-        const pdf = await pdfParse(buffer);
-        text = (pdf.text || "").trim();
-      } catch (e) {
-        console.error("pdf-parse error:", e);
-      }
-
-      if (!text || text.length < 30) {
-        const ocrResult = await Tesseract.recognize(uploadedFile.filepath, "eng");
-        text = (ocrResult.data.text || "").trim();
-      }
-
-      console.log("PDF TEXT:", text.slice(0, 500));
-
-      if (!text) {
-        return res.status(400).json({ error: "Impossible de lire la facture" });
-      }
-
-      const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-latest",
-        max_tokens: 1200,
-        messages: [
-          {
-            role: "user",
-            content: `
-Analyse cette facture et retourne UNIQUEMENT un JSON valide :
-
-{
-  "invoiceNumber": "",
-  "client": "",
-  "total": "",
-  "date": "",
-  "currency": "EUR"
-}
-
-Facture :
-${text}
-            `,
-          },
-        ],
-      });
-
-      const raw = response.content[0].text.trim();
-      const cleaned = raw
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
-
-      const facture = JSON.parse(cleaned);
-
-      return res.status(200).json({
-        ai: JSON.stringify(facture),
-      });
-    } catch (error) {
-      console.error("Erreur /api/invoice/convert:", error);
-      return res.status(500).json({ error: "Erreur conversion facture" });
-    }
+  return res.status(200).json({
+    ai: JSON.stringify({
+      invoiceNumber: "TEST-001",
+      client: "ACME Corp",
+      total: "150.00",
+      date: "2025-01-01",
+      currency: "EUR",
+    }),
   });
 }
