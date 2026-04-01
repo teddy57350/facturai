@@ -79,12 +79,10 @@ ${text}
 
       const facture = JSON.parse(cleaned);
 
-    return res.status(200).json({
-  ai: JSON.stringify({
-    client: "Test Client",
-    total: 123,
-    currency: "EUR",
-    date: "2024-01-01",
-    invoiceNumber: "TEST-001",
-  }),
-});
+     return res.status(200).json({ ai: JSON.stringify(facture) });
+    } catch (error) {
+      console.error("Erreur /api/invoice/convert:", error);
+      return res.status(500).json({ error: "Erreur conversion facture" });
+    }
+  });
+}
