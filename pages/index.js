@@ -1,82 +1,100 @@
-const handleFreeStart = () => {
-  if (freeCount >= FREE_LIMIT) {
-    alert("Limite gratuite atteinte (10 factures). Passe en Pro 🚀");
-    return;
-  }
-  setStep(1);
-};
+import { useState } from "react";
+import { useRouter } from "next/router";
+import { supabase } from "@/lib/supabase";
 
-const handleGenerate = async () => {
-  if (!file) {
-    alert("Ajoute une facture");
-    return;
-  }
+export default function Home() {
+  const router = useRouter();
 
-  setStep(2);
+  const [file, setFile] = useState(null);
+  const [step, setStep] = useState(0);
+  const [freeCount, setFreeCount] = useState(0);
 
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
+  const FREE_LIMIT = 10;
 
-    const res = await fetch("/api/invoice/convert", {
-      method: "POST",
-      body: formData,
-    });
+  const user = supabase.auth.getUser?.();
 
-    const data = await res.json();
+  const handleFreeStart = () => {
+    if (freeCount >= FREE_LIMIT) {
+      alert("Limite gratuite atteinte (10 factures). Passe en Pro 🚀");
+      return;
+    }
+    setStep(1);
+  };
 
-    let facture;
+  const handleGenerate = async () => {
+    if (!file) {
+      alert("Ajoute une facture");
+      return;
+    }
+
+    setStep(2);
+
     try {
-      facture = JSON.parse(data.ai);
-    } catch {
-      facture = data.ai;
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // 1. Convert IA
+      const res = await fetch("/api/invoice/convert", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      let facture;
+      try {
+        facture = JSON.parse(data.ai);
+      } catch {
+        facture = data.ai;
+      }
+
+      // 2. Generate PDF
+      const res2 = await fetch("/api/invoice/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ facture }),
+      });
+
+      const blob = await res2.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "facture_facturx.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setFreeCount((prev) => prev + 1);
+      setStep(3);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur génération facture");
+      setStep(0);
     }
+  };
 
-    const res2 = await fetch("/api/invoice/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ facture }),
-    });
+  const handleCheckout = async () => {
+    try {
+      const res = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+      });
 
-    const blob = await res2.blob();
+      const data = await res.json();
 
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "facture_facturx.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setFreeCount((prev) => prev + 1);
-    setStep(3);
-  } catch (err) {
-    console.error(err);
-    alert("Erreur génération facture");
-    setStep(0);
-  }
-};
-
-const handleCheckout = async () => {
-  try {
-    const res = await fetch("/api/stripe/create-checkout-session", {
-      method: "POST",
-    });
-
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Erreur Stripe");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Erreur Stripe");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur paiement");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Erreur paiement");
-  }
-};
+  };
+
 
 return (
   <>
@@ -180,7 +198,7 @@ return (
       }
     `}</style>
 
-    <div className="container">
+   <div className="container">
       <header>
         <div className="logo">FacturX SaaS 🚀</div>
         <div className="badge">EN 16931</div>
@@ -188,41 +206,38 @@ return (
 
       <div className="hero">
         <h1>Factur-X automatique ✨</h1>
-        <p>IA + génération PDF/A-3 + XML embarqué</p>
+        <p>IA + PDF/A-3 + XML embarqué</p>
 
         <button className="btn" onClick={handleFreeStart}>
           Commencer
         </button>
 
-        <div className="counter">
-          {freeCount} / {FREE_LIMIT} factures gratuites utilisées
+        <div>
+          {freeCount} / {FREE_LIMIT} factures gratuites
         </div>
       </div>
 
       {step === 1 && (
         <div className="card">
-          <h3>📄 Upload facture</h3>
+          <h3>Upload facture</h3>
           <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-          <br />
           <button className="btn" onClick={handleGenerate}>
-            Générer →
+            Générer
           </button>
         </div>
       )}
 
       {step === 2 && (
         <div className="card">
-          <h3>🔍 Analyse IA en cours...</h3>
-          <p>Extraction des données + conversion Factur-X</p>
+          <h3>Analyse IA...</h3>
         </div>
       )}
 
       {step === 3 && (
         <div className="card">
-          <h3>✅ Facture générée</h3>
-          <p>Format Factur-X prêt</p>
+          <h3>Facture générée ✅</h3>
           <button className="btn" onClick={handleGenerate}>
-            🚀 Générer ma facture
+            Générer encore
           </button>
         </div>
       )}
@@ -230,31 +245,20 @@ return (
       <div className="pricing">
         <div className="plan">
           <h3>Gratuit</h3>
-          <div className="price">0€</div>
-          <p>
-            ✔ 10 factures / mois<br />
-            ✔ Export Factur-X<br />
-            ✔ Support standard
-          </p>
+          <p>10 factures</p>
           <button className="btn" onClick={handleFreeStart}>
-            Commencer
+            Start
           </button>
         </div>
 
         <div className="plan pro">
           <h3>Pro</h3>
-          <div className="price">19€</div>
-          <p>
-            ✔ Factures illimitées<br />
-            ✔ IA avancée<br />
-            ✔ Export premium<br />
-            ✔ Support prioritaire
-          </p>
+          <p>19€/mois</p>
           <button className="btn" onClick={handleCheckout}>
             Passer Pro
           </button>
         </div>
       </div>
     </div>
-  </>
-);
+  );
+}
