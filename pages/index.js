@@ -19,77 +19,77 @@ export default function Home() {
     setStep(1);
   };
 
-  const handleGenerate = async () => {
-    if (!file) {
-      alert("Ajoute une facture");
-      return;
-    }
+ const handleGenerate = async () => {
+  if (!file) {
+    alert("Ajoute une facture");
+    return;
+  }
 
-    setStep(2);
+  setStep(2);
 
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/invoice/convert", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    let facture;
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/invoice/convert", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      let facture;
-      try {
-        facture = JSON.parse(data.ai);
-      } catch {
-        facture = data.ai;
-      }
-
-      const res2 = await fetch("/api/invoice/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ facture }),
-      });
-
-      const blob = await res2.blob();
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "facture_facturx.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      setFreeCount((prev) => prev + 1);
-      setStep(3);
-    } catch (err) {
-      console.error(err);
-      alert("Erreur génération facture");
-      setStep(0);
+      facture = JSON.parse(data.ai);
+    } catch {
+      facture = data.ai;
     }
-  };
 
-  const handleCheckout = async () => {
-    try {
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-      });
+    const res2 = await fetch("/api/invoice/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ facture }),
+    });
 
-      const data = await res.json();
+    const blob = await res2.blob();
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Erreur Stripe");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Erreur paiement");
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "facture_facturx.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setFreeCount((prev) => prev + 1);
+    setStep(3);
+  } catch (err) {
+    console.error(err);
+    alert("Erreur génération facture");
+    setStep(0);
+  }
+};
+
+const handleCheckout = async () => {
+  try {
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Erreur Stripe");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Erreur paiement");
+  }
+};
 
   return (
     <>
