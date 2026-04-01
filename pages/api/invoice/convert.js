@@ -14,10 +14,7 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   : null;
 
 
-console.log("API KEY PRESENT ?", !!process.env.ANTHROPIC_API_KEY);
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+console.log("KEY PREFIX:", process.env.ANTHROPIC_API_KEY?.slice(0, 7));
   }
 
 const form = new IncomingForm();
