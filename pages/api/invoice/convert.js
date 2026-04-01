@@ -36,6 +36,8 @@ export default async function handler(req, res) {
       const pdf = await pdfParse(buffer);
       const text = (pdf.text || "").trim();
 
+      console.log("PDF TEXT:", text.slice(0, 200));
+
       if (!text) {
         return res.status(400).json({
           error: "Le PDF ne contient pas de texte lisible",
