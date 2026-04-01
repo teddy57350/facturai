@@ -2,6 +2,7 @@ import formidable from "formidable";
 import fs from "fs";
 import pdfParse from "pdf-parse";
 import Anthropic from "@anthropic-ai/sdk";
+import Tesseract from "tesseract.js";
 
 export const config = {
   api: {
@@ -27,21 +28,30 @@ export default async function handler(req, res) {
       }
 
       const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
-
       if (!uploadedFile) {
         return res.status(400).json({ error: "Aucun fichier reçu" });
       }
 
       const buffer = fs.readFileSync(uploadedFile.filepath);
-      const pdf = await pdfParse(buffer);
-      const text = (pdf.text || "").trim();
 
-      console.log("PDF TEXT:", text.slice(0, 200));
+      let text = "";
+
+      try {
+        const pdf = await pdfParse(buffer);
+        text = (pdf.text || "").trim();
+      } catch (e) {
+        console.error("pdf-parse error:", e);
+      }
+
+      if (!text || text.length < 30) {
+        const ocrResult = await Tesseract.recognize(uploadedFile.filepath, "eng");
+        text = (ocrResult.data.text || "").trim();
+      }
+
+      console.log("PDF TEXT:", text.slice(0, 500));
 
       if (!text) {
-        return res.status(400).json({
-          error: "Le PDF ne contient pas de texte lisible",
-        });
+        return res.status(400).json({ error: "Impossible de lire la facture" });
       }
 
       const response = await anthropic.messages.create({
@@ -51,9 +61,8 @@ export default async function handler(req, res) {
           {
             role: "user",
             content: `
-Analyse cette facture et retourne UNIQUEMENT un JSON valide.
+Analyse cette facture et retourne UNIQUEMENT un JSON valide :
 
-Champs attendus :
 {
   "invoiceNumber": "",
   "client": "",
@@ -70,7 +79,6 @@ ${text}
       });
 
       const raw = response.content[0].text.trim();
-
       const cleaned = raw
         .replace(/^```json\s*/i, "")
         .replace(/^```\s*/i, "")
@@ -79,7 +87,9 @@ ${text}
 
       const facture = JSON.parse(cleaned);
 
-     return res.status(200).json({ ai: JSON.stringify(facture) });
+      return res.status(200).json({
+        ai: JSON.stringify(facture),
+      });
     } catch (error) {
       console.error("Erreur /api/invoice/convert:", error);
       return res.status(500).json({ error: "Erreur conversion facture" });
