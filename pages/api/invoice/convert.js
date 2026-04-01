@@ -90,8 +90,7 @@ ${text}
       let facture;
       try {
         facture = JSON.parse(cleaned);
-      } catch (e) {
-        console.error("JSON parse IA error:", cleaned);
+      } catch {
         return res.status(500).json({
           error: "Réponse IA invalide",
         });
@@ -106,5 +105,7 @@ ${text}
         error: error.message || "Erreur conversion facture",
       });
     }
+  });
+}
   });
 }
