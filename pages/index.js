@@ -1,487 +1,376 @@
 import { useState } from "react";
 
+const FREE_LIMIT = 10;
+
 export default function Home() {
   const [file, setFile] = useState(null);
   const [step, setStep] = useState(0);
   const [freeCount, setFreeCount] = useState(0);
-
-  const FREE_LIMIT = 10;
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
 
   const handleFreeStart = () => {
     if (freeCount >= FREE_LIMIT) {
-      alert("Limite gratuite atteinte (10 factures). Passe en Pro 🚀");
+      alert("Limite gratuite atteinte (10 factures). Passez en Pro pour continuer.");
       return;
     }
     setStep(1);
+    setError("");
   };
 
-const handleGenerate = async () => {
-  if (!file) {
-    alert("Ajoute une facture");
-    return;
-  }
-
-  setStep(2);
-
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("/api/invoice/convert", {
-      method: "POST",
-      body: formData,
-    });
-
-    const raw = await res.text();
-
-    if (!res.ok) {
-      throw new Error(raw);
+  const handleGenerate = async () => {
+    if (!file) {
+      setError("Veuillez sélectionner une facture.");
+      return;
     }
-
-    const data = JSON.parse(raw);
-
-    let facture;
+    setStep(2);
+    setError("");
     try {
-      facture = JSON.parse(data.ai);
-    } catch {
-      facture = data.ai;
-    }
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res2 = await fetch("/api/invoice/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ facture }),
-    });
+      const res = await fetch("/api/invoice/convert", { method: "POST", body: formData });
+      const raw = await res.text();
+      if (!res.ok) throw new Error(raw);
 
-    if (!res2.ok) {
-      const raw2 = await res2.text();
-      throw new Error(raw2);
-    }
+      const data = JSON.parse(raw);
+      let facture;
+      try { facture = JSON.parse(data.ai); } catch { facture = data.ai; }
 
-    const blob = await res2.blob();
-
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "facture_facturx.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setFreeCount((prev) => prev + 1);
-    setStep(3);
-  } catch (err) {
-    console.error(err);
-    alert(err.message || "Erreur génération facture");
-    setStep(0);
-  }
-};
-
-  const handleCheckout = async () => {
-    try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res2 = await fetch("/api/invoice/generate", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ facture }),
       });
 
-      const data = await res.json();
+      if (!res2.ok) { const raw2 = await res2.text(); throw new Error(raw2); }
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Erreur Stripe");
-      }
+      const blob = await res2.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "facture_facturx.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setFreeCount((prev) => prev + 1);
+      setStep(3);
     } catch (err) {
-      console.error(err);
-      alert("Erreur paiement");
+      setError("Erreur : " + err.message);
+      setStep(1);
     }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) setFile(dropped);
   };
 
   return (
     <>
-      <style jsx global>{`
-        body {
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          background: radial-gradient(circle at top, #a5f3fc, #f0fdf4, #eef2ff);
-          min-height: 100vh;
-        }
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a2e; }
 
-        body::before {
-          content: "";
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          width: 500px;
-          height: 500px;
-          transform: translate(-50%, -50%);
-          background: url("/watermark.png") no-repeat center;
-          background-size: contain;
-          opacity: 0.05;
-          pointer-events: none;
-          z-index: 0;
-        }
+        .topbar { background: #fff; border-bottom: 1px solid #e8ecf0; padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .logo { font-size: 20px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px; }
+        .logo span { color: #2563eb; }
+        .badge-top { background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
 
-        .container {
-          max-width: 1100px;
-          margin: auto;
-          padding: 2rem;
-          position: relative;
-          z-index: 1;
-        }
+        .hero { background: #fff; border-bottom: 1px solid #e8ecf0; padding: 4rem 2rem 3rem; text-align: center; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; margin-bottom: 1.5rem; }
+        .hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; color: #1a1a2e; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -1px; }
+        .hero h1 span { color: #2563eb; }
+        .hero p { font-size: 18px; color: #64748b; max-width: 560px; margin: 0 auto 2rem; line-height: 1.6; }
+        .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-hero { padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: #2563eb; border: 2px solid #2563eb; }
+        .btn-outline:hover { background: #eff6ff; }
 
-        header {
-          display: flex;
-          justify-content: space-between;
-          padding: 1rem 2rem;
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(12px);
-          border-radius: 14px;
-          border: 1px solid #e5e7eb;
-        }
+        .urgency { background: #fef2f2; border: 1px solid #fecaca; padding: 1rem 2rem; text-align: center; }
+        .urgency p { font-size: 14px; color: #991b1b; font-weight: 500; }
+        .urgency strong { font-weight: 700; }
 
-        .logo {
-          font-weight: 900;
-          font-size: 16px;
-        }
+        .main { max-width: 680px; margin: 0 auto; padding: 2.5rem 1rem; }
 
-        .badge {
-          background: #dcfce7;
-          color: #166534;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 12px;
-        }
+        .counter-bar { background: #fff; border: 1px solid #e8ecf0; border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .counter-label { font-size: 13px; color: #64748b; }
+        .counter-value { font-size: 13px; font-weight: 600; color: #2563eb; }
+        .counter-bar progress { width: 100px; height: 6px; border-radius: 3px; }
 
-        .hero {
-          text-align: center;
-          margin: 2.5rem 0 1.5rem;
-        }
+        .card { background: #fff; border: 1px solid #e8ecf0; border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; }
+        .card h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 1rem; }
 
-        .hero h1 {
-          font-size: 56px;
-          margin: 0 0 10px;
-          color: #0f172a;
-        }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.15s; background: #f8fafc; }
+        .upload-zone.dragging { border-color: #2563eb; background: #eff6ff; }
+        .upload-zone:hover { border-color: #94a3b8; }
+        .upload-icon { font-size: 32px; margin-bottom: 8px; }
+        .upload-zone h4 { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
+        .upload-zone p { font-size: 13px; color: #94a3b8; margin-bottom: 12px; }
+        .file-formats { display: flex; gap: 6px; justify-content: center; }
+        .fmt { background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
 
-        .hero p {
-          font-size: 17px;
-          color: #334155;
-          margin: 0 0 20px;
-        }
+        .file-selected { display: flex; align-items: center; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; margin-top: 12px; }
+        .file-name { font-size: 13px; font-weight: 600; color: #166534; flex: 1; }
+        .file-remove { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; }
 
-        .counter {
-          margin-top: 10px;
-          font-size: 14px;
-          color: #111827;
-        }
+        .btn-generate { width: 100%; padding: 14px; background: #2563eb; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1rem; transition: all 0.15s; }
+        .btn-generate:hover { background: #1d4ed8; }
+        .btn-generate:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        .btn {
-          background: linear-gradient(135deg, #7c3aed, #4f46e5);
-          color: white;
-          border: none;
-          padding: 12px 18px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
-          margin-top: 10px;
-        }
+        .loading-card { text-align: center; padding: 3rem 2rem; }
+        .spinner { width: 44px; height: 44px; border: 3px solid #e8ecf0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-card h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+        .loading-card p { font-size: 14px; color: #64748b; }
 
-        .card {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 14px;
-          margin-top: 20px;
-          border: 1px solid #eee;
-        }
+        .success-card { text-align: center; padding: 2.5rem 2rem; }
+        .success-icon { width: 60px; height: 60px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; }
+        .success-card h3 { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+        .success-card p { font-size: 14px; color: #64748b; margin-bottom: 1.5rem; }
+        .badges-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+        .badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+        .badge-green { background: #f0fdf4; color: #166534; }
+        .badge-blue { background: #eff6ff; color: #1d4ed8; }
+        .btn-again { padding: 12px 24px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
 
-        .card h3 {
-          margin-top: 0;
-          color: #111827;
-        }
+        .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #991b1b; }
 
-        .uploadBox {
-          margin-top: 10px;
-          display: flex;
-          gap: 12px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
+        .how { padding: 3rem 2rem; background: #fff; border-top: 1px solid #e8ecf0; border-bottom: 1px solid #e8ecf0; }
+        .how-inner { max-width: 680px; margin: 0 auto; }
+        .section-label { font-size: 12px; font-weight: 700; color: #2563eb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+        .section-title { font-size: 28px; font-weight: 800; color: #1a1a2e; margin-bottom: 2rem; letter-spacing: -0.5px; }
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; }
+        .step-item { text-align: center; }
+        .step-num { width: 40px; height: 40px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #2563eb; margin: 0 auto 10px; }
+        .step-item h4 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .step-item p { font-size: 13px; color: #64748b; line-height: 1.5; }
 
-        .pricingSection {
-          padding: 40px 0 20px;
-        }
+        .pricing-section { max-width: 680px; margin: 0 auto; padding: 3rem 1rem; }
+        .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 540px) { .pricing-grid { grid-template-columns: 1fr; } }
+        .plan-card { background: #fff; border: 1px solid #e8ecf0; border-radius: 14px; padding: 1.75rem; position: relative; }
+        .plan-card.popular { border: 2px solid #2563eb; }
+        .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #2563eb; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.5px; white-space: nowrap; }
+        .plan-name { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+        .plan-price { font-size: 36px; font-weight: 800; color: #1a1a2e; margin-bottom: 2px; }
+        .plan-price span { font-size: 16px; font-weight: 400; color: #94a3b8; }
+        .plan-desc { font-size: 13px; color: #64748b; margin-bottom: 1.25rem; }
+        .plan-features { list-style: none; margin-bottom: 1.5rem; }
+        .plan-features li { font-size: 13px; color: #374151; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
+        .plan-features li::before { content: "✓"; color: #2563eb; font-weight: 700; flex-shrink: 0; }
+        .plan-btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+        .plan-btn.free { background: #f1f5f9; color: #1a1a2e; }
+        .plan-btn.free:hover { background: #e2e8f0; }
+        .plan-btn.pro { background: #2563eb; color: #fff; }
+        .plan-btn.pro:hover { background: #1d4ed8; }
 
-        .pricingTitle {
-          text-align: center;
-          font-size: 52px;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0;
-        }
+        .faq { background: #fff; border-top: 1px solid #e8ecf0; padding: 3rem 2rem; }
+        .faq-inner { max-width: 680px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid #e8ecf0; padding: 1.25rem 0; }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+        .faq-a { font-size: 14px; color: #64748b; line-height: 1.6; }
 
-        .pricingSubtitle {
-          text-align: center;
-          color: #64748b;
-          margin-top: 12px;
-          margin-bottom: 30px;
-          font-size: 16px;
-        }
-
-        .pricing {
-          display: flex;
-          gap: 28px;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .plan {
-          width: 360px;
-          padding: 2.2rem;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.75);
-          border: 1px solid #d1d5db;
-          text-align: left;
-          position: relative;
-          box-sizing: border-box;
-        }
-
-        .plan.pro {
-          border: 2px solid #2563eb;
-          background: rgba(255, 255, 255, 0.82);
-        }
-
-        .popular {
-          position: absolute;
-          top: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #2563eb;
-          color: white;
-          border-radius: 999px;
-          padding: 4px 14px;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .plan h3 {
-          margin: 20px 0 18px;
-          font-size: 22px;
-          color: #0f172a;
-        }
-
-        .priceRow {
-          display: flex;
-          align-items: baseline;
-          gap: 8px;
-          margin-bottom: 6px;
-        }
-
-        .price {
-          font-size: 50px;
-          font-weight: 800;
-          color: #0f172a;
-          line-height: 1;
-        }
-
-        .per {
-          color: #64748b;
-          font-size: 18px;
-        }
-
-        .underPrice {
-          color: #64748b;
-          font-size: 16px;
-          margin-bottom: 28px;
-        }
-
-        .features {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          color: #334155;
-          font-size: 15px;
-          margin-bottom: 26px;
-        }
-
-        .feature {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .check {
-          color: #16a34a;
-          font-weight: 700;
-          font-size: 18px;
-        }
-
-        .planButton {
-          width: 100%;
-          border-radius: 12px;
-          padding: 14px 18px;
-          font-weight: 700;
-          font-size: 15px;
-          cursor: pointer;
-        }
-
-        .planButton.free {
-          background: white;
-          border: 2px solid #d1d5db;
-          color: #0f172a;
-        }
-
-        .planButton.pro {
-          background: #2563eb;
-          border: none;
-          color: white;
-        }
+        .footer { background: #1a1a2e; color: #94a3b8; text-align: center; padding: 1.5rem; font-size: 13px; }
+        .footer a { color: #94a3b8; text-decoration: none; margin: 0 8px; }
+        .footer a:hover { color: #fff; }
       `}</style>
 
-      <div className="container">
-        <header>
-          <div className="logo">FacturX SaaS 🚀</div>
-          <div className="badge">EN 16931</div>
-        </header>
+      {/* TOPBAR */}
+      <div className="topbar">
+        <div className="logo">Factur<span>ly</span></div>
+        <div className="badge-top">EN 16931 CONFORME</div>
+      </div>
 
-        <div className="hero">
-          <h1>Factur-X automatique ✨</h1>
-          <p>IA + PDF/A-3 + XML embarqué</p>
+      {/* URGENCE */}
+      <div className="urgency">
+        <p>Obligation légale : facturation électronique <strong>Factur-X obligatoire dès septembre 2026</strong> pour les grandes entreprises — et <strong>2027 pour les TPE/PME</strong>.</p>
+      </div>
 
-          <button className="btn" onClick={handleFreeStart}>
-            Commencer
-          </button>
-
-          <div className="counter">
-            {freeCount} / {FREE_LIMIT} factures gratuites
-          </div>
+      {/* HERO */}
+      <div className="hero">
+        <div className="hero-badge">Nouveau — Propulsé par IA</div>
+        <h1>Transformez vos factures<br />en <span>Factur-X</span> en 30 secondes</h1>
+        <p>Facturly transforme vos factures Word ou PDF en format légal Factur-X automatiquement. Zéro comptable. Zéro prise de tête.</p>
+        <div className="hero-actions">
+          <button className="btn-hero btn-primary" onClick={handleFreeStart}>Essayer gratuitement</button>
+          <button className="btn-hero btn-outline" onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}>Voir les tarifs</button>
         </div>
+      </div>
+
+      {/* APP */}
+      <div className="main">
+        <div className="counter-bar">
+          <span className="counter-label">Factures gratuites utilisées</span>
+          <span className="counter-value">{freeCount} / {FREE_LIMIT}</span>
+        </div>
+
+        {error && <div className="error-box">{error}</div>}
+
+        {step === 0 && (
+          <div className="card" style={{ textAlign: 'center' }}>
+            <h3>Commencez maintenant</h3>
+            <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '14px' }}>10 conversions gratuites — aucune carte requise</p>
+            <button className="btn-generate" onClick={handleFreeStart}>Convertir une facture →</button>
+          </div>
+        )}
 
         {step === 1 && (
           <div className="card">
-            <h3>📄 Upload facture</h3>
-            <div className="uploadBox">
-              <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-              <button className="btn" onClick={handleGenerate}>
-                Générer →
-              </button>
+            <h3>Importez votre facture</h3>
+            <div
+              className={`upload-zone ${dragging ? 'dragging' : ''}`}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <div className="upload-icon">📄</div>
+              <h4>Glissez votre facture ici</h4>
+              <p>ou cliquez pour sélectionner</p>
+              <div className="file-formats">
+                <span className="fmt">PDF</span>
+                <span className="fmt">Word</span>
+                <span className="fmt">JPG/PNG</span>
+              </div>
+              <input id="fileInput" type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={(e) => setFile(e.target.files[0])} />
             </div>
-          </div>
-        )}
 
-        {step === 2 && (
-          <div className="card">
-            <h3>🔍 Analyse IA en cours...</h3>
-            <p>Extraction des données + conversion Factur-X</p>
-          </div>
-        )}
+            {file && (
+              <div className="file-selected">
+                <span>📎</span>
+                <span className="file-name">{file.name}</span>
+                <button className="file-remove" onClick={() => setFile(null)}>✕</button>
+              </div>
+            )}
 
-        {step === 3 && (
-          <div className="card">
-            <h3>✅ Facture générée</h3>
-            <p>Format Factur-X prêt</p>
-            <button className="btn" onClick={handleGenerate}>
-              Générer encore
+            <button className="btn-generate" onClick={handleGenerate} disabled={!file}>
+              Générer Factur-X →
             </button>
           </div>
         )}
 
-        <section className="pricingSection">
-          <h2 className="pricingTitle">Choisissez votre plan</h2>
-          <p className="pricingSubtitle">
-            Factures illimitées ou essayez gratuitement
-          </p>
+        {step === 2 && (
+          <div className="card loading-card">
+            <div className="spinner"></div>
+            <h3>Analyse en cours...</h3>
+            <p>L'IA extrait les données et génère votre Factur-X</p>
+          </div>
+        )}
 
-          <div className="pricing">
-            <div className="plan">
-              <h3>Gratuit</h3>
-
-              <div className="priceRow">
-                <div className="price">0€</div>
-                <div className="per">/ mois</div>
-              </div>
-
-              <div className="underPrice">Pour tester Facturly</div>
-
-              <div className="features">
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>10 factures par mois</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Extraction automatique par IA</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Génération XML Factur-X</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Conforme EN 16931</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Support par email</span>
-                </div>
-              </div>
-
-              <button className="planButton free" onClick={handleFreeStart}>
-                Commencer gratuitement
-              </button>
+        {step === 3 && (
+          <div className="card success-card">
+            <div className="success-icon">✅</div>
+            <h3>Facture Factur-X générée</h3>
+            <p>Votre fichier a été téléchargé automatiquement.</p>
+            <div className="badges-row">
+              <span className="badge badge-green">EN 16931 conforme</span>
+              <span className="badge badge-green">XML embarqué</span>
+              <span className="badge badge-blue">PDF/A-3</span>
             </div>
+            <button className="btn-again" onClick={() => { setStep(1); setFile(null); }}>Convertir une autre facture</button>
+          </div>
+        )}
+      </div>
 
-            <div className="plan pro">
-              <div className="popular">POPULAIRE</div>
-
-              <h3>Plan Pro</h3>
-
-              <div className="priceRow">
-                <div className="price">19€</div>
-                <div className="per">/ mois</div>
-              </div>
-
-              <div className="underPrice">Pour les professionnels</div>
-
-              <div className="features">
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Factures illimitées</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Extraction automatique par IA</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Génération XML Factur-X</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Conforme EN 16931</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Support prioritaire</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Historique complet</span>
-                </div>
-                <div className="feature">
-                  <span className="check">✓</span>
-                  <span>Accès API</span>
-                </div>
-              </div>
-
-              <button className="planButton pro" onClick={handleCheckout}>
-                Passer au Pro
-              </button>
+      {/* COMMENT CA MARCHE */}
+      <div className="how">
+        <div className="how-inner">
+          <div className="section-label">Simple et rapide</div>
+          <div className="section-title">Comment ça marche ?</div>
+          <div className="steps-grid">
+            <div className="step-item">
+              <div className="step-num">1</div>
+              <h4>Importez</h4>
+              <p>Déposez votre facture PDF, Word ou image</p>
+            </div>
+            <div className="step-item">
+              <div className="step-num">2</div>
+              <h4>L'IA analyse</h4>
+              <p>Extraction automatique de toutes les données</p>
+            </div>
+            <div className="step-item">
+              <div className="step-num">3</div>
+              <h4>Téléchargez</h4>
+              <p>Votre Factur-X conforme EN 16931 est prêt</p>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
+
+      {/* PRICING */}
+      <div className="pricing-section" id="pricing">
+        <div className="section-label">Tarifs</div>
+        <div className="section-title">Simple et transparent</div>
+        <div className="pricing-grid">
+          <div className="plan-card">
+            <div className="plan-name">Gratuit</div>
+            <div className="plan-price">0€ <span>/ mois</span></div>
+            <div className="plan-desc">Pour tester Facturly</div>
+            <ul className="plan-features">
+              <li>10 factures par mois</li>
+              <li>Extraction automatique IA</li>
+              <li>Génération XML Factur-X</li>
+              <li>Conforme EN 16931</li>
+              <li>Support par email</li>
+            </ul>
+            <button className="plan-btn free" onClick={handleFreeStart}>Commencer gratuitement</button>
+          </div>
+
+          <div className="plan-card popular">
+            <div className="popular-badge">POPULAIRE</div>
+            <div className="plan-name">Pro</div>
+            <div className="plan-price">9€ <span>/ mois</span></div>
+            <div className="plan-desc">Pour les professionnels</div>
+            <ul className="plan-features">
+              <li>Factures illimitées</li>
+              <li>Extraction automatique IA</li>
+              <li>Génération XML Factur-X</li>
+              <li>Conforme EN 16931</li>
+              <li>Support prioritaire</li>
+              <li>Historique complet</li>
+              <li>Accès API</li>
+            </ul>
+            <button className="plan-btn pro">Passer au Pro</button>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="faq">
+        <div className="faq-inner">
+          <div className="section-label">FAQ</div>
+          <div className="section-title">Questions fréquentes</div>
+          <div className="faq-item">
+            <div className="faq-q">Est-ce vraiment conforme à la réglementation française ?</div>
+            <div className="faq-a">Oui. Facturly génère des fichiers conformes à la norme EN 16931 et au format Factur-X, le standard retenu par la France pour la facturation électronique obligatoire dès 2026-2027.</div>
+          </div>
+          <div className="faq-item">
+            <div className="faq-q">Mes données sont-elles sécurisées ?</div>
+            <div className="faq-a">Vos factures sont traitées à la volée et ne sont jamais stockées sur nos serveurs. L'analyse est effectuée en temps réel puis les données sont supprimées immédiatement.</div>
+          </div>
+          <div className="faq-item">
+            <div className="faq-q">Quels formats de fichiers sont acceptés ?</div>
+            <div className="faq-a">PDF, Word (.doc, .docx), et images (JPG, PNG). L'IA est capable d'extraire les données de n'importe quelle mise en page de facture.</div>
+          </div>
+          <div className="faq-item">
+            <div className="faq-q">J'utilise déjà un logiciel de facturation — est-ce utile ?</div>
+            <div className="faq-a">Oui. Si votre logiciel ne génère pas encore de Factur-X, Facturly vous permet de convertir vos exports PDF en quelques secondes sans changer vos habitudes.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="footer">
+        <p>© 2026 Facturly — <a href="/mentions-legales">Mentions légales</a> <a href="/confidentialite">Confidentialité</a> <a href="/cgu">CGU</a></p>
       </div>
     </>
   );
+}
 }
