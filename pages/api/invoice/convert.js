@@ -9,9 +9,9 @@ export const config = {
   },
 };
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   form.parse(req, async (err, fields, files) => {
     try {
       if (err) {
-        return res.status(500).json({ error: "Upload error" });
+        return res.status(500).json({ error: `Upload error: ${err.message}` });
       }
 
       const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
@@ -32,14 +32,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Aucun fichier reçu" });
       }
 
+      if (!openai) {
+        return res.status(500).json({ error: "OPENAI_API_KEY manquante sur le serveur" });
+      }
+
       const buffer = fs.readFileSync(uploadedFile.filepath);
 
-      const pdf = await pdfParse(buffer);
-      const text = (pdf.text || "").trim();
+      let text = "";
+      try {
+        const pdf = await pdfParse(buffer);
+        text = (pdf.text || "").trim();
+      } catch (e) {
+        return res.status(500).json({ error: `Erreur lecture PDF: ${e.message}` });
+      }
 
       if (!text || text.length < 20) {
         return res.status(400).json({
-          error: "PDF non lisible (scan non géré)",
+          error: "Le PDF ne contient pas assez de texte lisible.",
         });
       }
 
@@ -67,14 +76,14 @@ ${text}
         ],
       });
 
-      const raw = completion.choices[0].message.content.trim();
+      const raw = completion.choices?.[0]?.message?.content?.trim() || "";
 
       let facture;
       try {
         facture = JSON.parse(raw);
       } catch {
         return res.status(500).json({
-          error: "Réponse IA invalide",
+          error: `Réponse IA invalide: ${raw}`,
         });
       }
 
@@ -82,10 +91,9 @@ ${text}
         ai: JSON.stringify(facture),
       });
     } catch (error) {
-      console.error(error);
       return res.status(500).json({
         error: error.message || "Erreur conversion facture",
-    });
+      });
     }
   });
 }
