@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       }
 
       const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-latest",
+        model: "claude-3-sonnet-20240229",
         max_tokens: 1200,
         messages: [
           {
