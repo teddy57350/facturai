@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const FREE_LIMIT = 10;
 
@@ -8,21 +8,59 @@ export default function Home() {
   const [freeCount, setFreeCount] = useState(0);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const savedEmail = localStorage.getItem("facturai_email");
+    const savedCount = parseInt(localStorage.getItem("facturai_count") || "0");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setEmailConfirmed(true);
+      setFreeCount(savedCount);
+    }
+  }, []);
+
+  if (!mounted) return null;
+
+  const handleEmailSubmit = () => {
+    if (!email || !email.includes("@")) {
+      alert("Veuillez entrer un email valide.");
+      return;
+    }
+    localStorage.setItem("facturai_email", email);
+    localStorage.setItem("facturai_count", "0");
+    setEmailConfirmed(true);
+    setShowEmailModal(false);
+    setStep(1);
+    setError("");
+    setTimeout(() => {
+      const el = document.getElementById("upload");
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 100);
+  };
 
   const handleFreeStart = () => {
+    if (!emailConfirmed) {
+      setShowEmailModal(true);
+      return;
+    }
     if (freeCount >= FREE_LIMIT) {
       alert("Limite gratuite atteinte (10 factures). Passez en Pro pour continuer.");
       return;
     }
-
     setStep(1);
     setError("");
-
     setTimeout(() => {
       const el = document.getElementById("upload");
       if (el) {
-        const yOffset = -80;
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
         window.scrollTo({ top: y, behavior: "smooth" });
       }
     }, 100);
@@ -64,7 +102,9 @@ export default function Home() {
       a.click();
       a.remove();
 
-      setFreeCount((prev) => prev + 1);
+      const newCount = freeCount + 1;
+      setFreeCount(newCount);
+      localStorage.setItem("facturai_count", newCount.toString());
       setStep(3);
     } catch (err) {
       setError("Erreur : " + err.message);
@@ -173,10 +213,9 @@ export default function Home() {
         .plan-features { list-style: none; margin-bottom: 1.5rem; }
         .plan-features li { font-size: 13px; color: #374151; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
         .plan-features li::before { content: "✓"; color: #2563eb; font-weight: 700; flex-shrink: 0; }
-        .plan-btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
-        .plan-btn.free { background: #f1f5f9; color: #1a1a2e; }
-        .plan-btn.free:hover { background: #e2e8f0; }
-        .plan-btn.pro { background: #2563eb; color: #fff; }
+        .plan-btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #e8ecf0; background: #f1f5f9; color: #1a1a2e; transition: all 0.15s; }
+        .plan-btn:hover { background: #e2e8f0; }
+        .plan-btn.pro { background: #2563eb; color: #fff; border: none; }
         .plan-btn.pro:hover { background: #1d4ed8; }
 
         .faq { background: #fff; border-top: 1px solid #e8ecf0; padding: 3rem 2rem; }
@@ -189,7 +228,43 @@ export default function Home() {
         .footer { background: #1a1a2e; color: #94a3b8; text-align: center; padding: 1.5rem; font-size: 13px; }
         .footer a { color: #94a3b8; text-decoration: none; margin: 0 8px; }
         .footer a:hover { color: #fff; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-box { background: #fff; border-radius: 14px; padding: 2rem; max-width: 420px; width: 100%; }
+        .modal-box h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+        .modal-box p { font-size: 14px; color: #64748b; margin-bottom: 1.5rem; line-height: 1.6; }
+        .modal-input { width: 100%; padding: 12px 14px; border: 1px solid #e8ecf0; border-radius: 8px; font-size: 15px; margin-bottom: 12px; outline: none; font-family: inherit; }
+        .modal-input:focus { border-color: #2563eb; }
+        .modal-btn { width: 100%; padding: 13px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; font-family: inherit; }
+        .modal-cancel { width: 100%; padding: 10px; background: transparent; color: #94a3b8; border: none; font-size: 13px; cursor: pointer; font-family: inherit; }
+
+        .email-info { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 8px; }
       `}</style>
+
+      {/* MODAL EMAIL */}
+      {showEmailModal && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>Commencer gratuitement</h3>
+            <p>Entrez votre email pour accéder à vos 10 conversions gratuites. Aucune carte requise.</p>
+            <input
+              className="modal-input"
+              type="email"
+              placeholder="votre@email.fr"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()}
+              autoFocus
+            />
+            <button className="modal-btn" onClick={handleEmailSubmit}>
+              Continuer gratuitement →
+            </button>
+            <button className="modal-cancel" onClick={() => setShowEmailModal(false)}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* TOPBAR */}
       <div className="topbar">
@@ -209,23 +284,25 @@ export default function Home() {
         <p>FacturAI transforme vos factures Word ou PDF en format légal Factur-X automatiquement. Zéro comptable. Zéro prise de tête.</p>
         <div className="hero-actions">
           <button className="btn-hero btn-primary" onClick={handleFreeStart}>Essayer gratuitement</button>
-          <button className="btn-hero btn-outline" onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}>Voir les tarifs</button>
+          <button className="btn-hero btn-outline" onClick={() => document.getElementById("pricing").scrollIntoView({ behavior: "smooth" })}>Voir les tarifs</button>
         </div>
       </div>
 
       {/* APP */}
       <div className="main" id="upload">
         <div className="counter-bar">
-          <span className="counter-label">Factures gratuites utilisées</span>
+          <span className="counter-label">
+            {emailConfirmed ? `Connecté : ${email}` : "Factures gratuites"}
+          </span>
           <span className="counter-value" suppressHydrationWarning>{freeCount} / {FREE_LIMIT}</span>
         </div>
 
         {error && <div className="error-box">{error}</div>}
 
         {step === 0 && (
-          <div className="card" style={{ textAlign: 'center' }}>
+          <div className="card" style={{ textAlign: "center" }}>
             <h3>Commencez maintenant</h3>
-            <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '14px' }}>10 conversions gratuites — aucune carte requise</p>
+            <p style={{ color: "#64748b", marginBottom: "1.5rem", fontSize: "14px" }}>10 conversions gratuites — aucune carte requise</p>
             <button className="btn-generate" onClick={handleFreeStart}>Convertir une facture →</button>
           </div>
         )}
@@ -234,11 +311,11 @@ export default function Home() {
           <div className="card">
             <h3>Importez votre facture</h3>
             <div
-              className={`upload-zone ${dragging ? 'dragging' : ''}`}
+              className={`upload-zone ${dragging ? "dragging" : ""}`}
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
-              onClick={() => document.getElementById('fileInput').click()}
+              onClick={() => document.getElementById("fileInput").click()}
             >
               <div className="upload-icon">📄</div>
               <h4>Glissez votre facture ici</h4>
@@ -248,7 +325,7 @@ export default function Home() {
                 <span className="fmt">Word</span>
                 <span className="fmt">JPG/PNG</span>
               </div>
-              <input id="fileInput" type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={(e) => setFile(e.target.files[0])} />
+              <input id="fileInput" type="file" style={{ display: "none" }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={(e) => setFile(e.target.files[0])} />
             </div>
 
             {file && (
@@ -269,7 +346,7 @@ export default function Home() {
           <div className="card loading-card">
             <div className="spinner"></div>
             <h3>Analyse en cours...</h3>
-            <p>L'IA extrait les données et génère votre Factur-X</p>
+            <p>L&apos;IA extrait les données et génère votre Factur-X</p>
           </div>
         )}
 
@@ -301,7 +378,7 @@ export default function Home() {
             </div>
             <div className="step-item">
               <div className="step-num">2</div>
-              <h4>L'IA analyse</h4>
+              <h4>L&apos;IA analyse</h4>
               <p>Extraction automatique de toutes les données</p>
             </div>
             <div className="step-item">
@@ -329,17 +406,7 @@ export default function Home() {
               <li>Conforme EN 16931</li>
               <li>Support par email</li>
             </ul>
-            <button
-              className="plan-btn"
-              onClick={() => {
-                const el = document.getElementById("upload");
-                if (el) {
-                  const yOffset = -80;
-                  const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                  window.scrollTo({ top: y, behavior: "smooth" });
-                }
-              }}
-            >
+            <button className="plan-btn" onClick={handleFreeStart}>
               Commencer gratuitement
             </button>
           </div>
@@ -364,11 +431,10 @@ export default function Home() {
               onClick={async () => {
                 const res = await fetch("/api/stripe/checkout", { method: "POST" });
                 const data = await res.json();
-
                 if (data.url) {
                   window.location.href = data.url;
                 } else {
-                  alert("Erreur Stripe");
+                  alert("Erreur Stripe : " + data.error);
                 }
               }}
             >
@@ -389,14 +455,14 @@ export default function Home() {
           </div>
           <div className="faq-item">
             <div className="faq-q">Mes données sont-elles sécurisées ?</div>
-            <div className="faq-a">Vos factures sont traitées à la volée et ne sont jamais stockées sur nos serveurs. L'analyse est effectuée en temps réel puis les données sont supprimées immédiatement.</div>
+            <div className="faq-a">Vos factures sont traitées à la volée et ne sont jamais stockées sur nos serveurs. L&apos;analyse est effectuée en temps réel puis les données sont supprimées immédiatement.</div>
           </div>
           <div className="faq-item">
             <div className="faq-q">Quels formats de fichiers sont acceptés ?</div>
-            <div className="faq-a">PDF, Word (.doc, .docx), et images (JPG, PNG). L'IA est capable d'extraire les données de n'importe quelle mise en page de facture.</div>
+            <div className="faq-a">PDF, Word (.doc, .docx), et images (JPG, PNG). L&apos;IA est capable d&apos;extraire les données de n&apos;importe quelle mise en page de facture.</div>
           </div>
           <div className="faq-item">
-            <div className="faq-q">J'utilise déjà un logiciel de facturation — est-ce utile ?</div>
+            <div className="faq-q">J&apos;utilise déjà un logiciel de facturation — est-ce utile ?</div>
             <div className="faq-a">Oui. Si votre logiciel ne génère pas encore de Factur-X, FacturAI vous permet de convertir vos exports PDF en quelques secondes sans changer vos habitudes.</div>
           </div>
         </div>
