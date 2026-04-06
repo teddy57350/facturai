@@ -343,6 +343,7 @@ export default function Home() {
     const res = await fetch("/api/stripe/checkout", { method: "POST" });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
+    else alert(data.error || "Erreur paiement");
   }}
 >
   Passer au Pro
