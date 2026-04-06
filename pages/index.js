@@ -343,7 +343,22 @@ export default function Home() {
               <li>Historique complet</li>
               <li>Accès API</li>
             </ul>
-            <button className="plan-btn pro">Passer au Pro</button>
+           <button
+  type="button"
+  className="plan-btn pro"
+  onClick={async () => {
+    const res = await fetch("/api/stripe/checkout", { method: "POST" });
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Erreur Stripe");
+    }
+  }}
+>
+  Passer au Pro
+</button>
           </div>
         </div>
       </div>
