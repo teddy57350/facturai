@@ -12,7 +12,8 @@ export default function Home() {
   const handleFreeStart = () => {
 <span suppressHydrationWarning>
   {freeCount} / {FREE_LIMIT}
-</span> {
+</span> 
+  
       alert("Limite gratuite atteinte (10 factures). Passez en Pro pour continuer.");
       return;
     }
