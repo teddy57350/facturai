@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       mode: "subscription",
       line_items: [
         {
-          price: "price_1TIrKOLcn25N5LCHbvQ3qGvj",
+          price: "price_1TGzLJLcn25N5LCHtJGUeLa4",
           quantity: 1,
         },
       ],
@@ -23,6 +23,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error("STRIPE ERROR:", error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: "Erreur Stripe" });
   }
 }
