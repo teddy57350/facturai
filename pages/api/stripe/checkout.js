@@ -12,10 +12,17 @@ export default async function handler(req, res) {
       mode: "subscription",
       line_items: [
         {
-        price: process.env.STRIPE_PRICE_ID,
+          price: process.env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
       success_url: `${process.env.NEXT_PUBLIC_URL}/?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/?canceled=true`,
     });
+
+    return res.status(200).json({ url: session.url });
+  } catch (error) {
+    console.error("STRIPE ERROR");
+    return res.status(500).json({ error: "Erreur Stripe" });
+  }
+}
