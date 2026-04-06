@@ -326,7 +326,11 @@ export default function Home() {
               <li>Conforme EN 16931</li>
               <li>Support par email</li>
             </ul>
-            <button className="plan-btn free" onClick={handleFreeStart}>Commencer gratuitement</button>
+            <a href="#upload">
+  <button className="btn">
+    Commencer gratuitement
+  </button>
+</a>
           </div>
 
           <div className="plan-card popular">
