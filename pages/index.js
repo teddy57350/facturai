@@ -326,15 +326,12 @@ export default function Home() {
               <li>Conforme EN 16931</li>
               <li>Support par email</li>
             </ul>
-     <button
-  className="btn"
+    <button
+  className="plan-btn"
   onClick={() => {
-    const el = document.getElementById("upload");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    } else {
-      console.error("ID upload introuvable");
-    }
+    document.getElementById("upload")?.scrollIntoView({
+      behavior: "smooth",
+    });
   }}
 >
   Commencer gratuitement
