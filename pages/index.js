@@ -257,14 +257,15 @@ export default function Home() {
             <h3>Commencer gratuitement</h3>
             <p>Entrez votre email pour accéder à vos 10 conversions gratuites. Aucune carte requise.</p>
             <input
-              className="modal-input"
-              type="email"
-              placeholder="votre@email.fr"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()}
-              autoFocus
-            />
+  className="modal-input"
+  type="email"
+  placeholder="votre@email.fr"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()}
+  autoComplete="off"
+  autoFocus
+/>
             <button className="modal-btn" onClick={handleEmailSubmit}>
               Continuer gratuitement →
             </button>
