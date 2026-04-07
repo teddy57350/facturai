@@ -7,6 +7,7 @@ export default function Home() {
   const [file, setFile] = useState(null);
   const [step, setStep] = useState(0);
   const [freeCount, setFreeCount] = useState(0);
+  const [isPro, setIsPro] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,7 +21,6 @@ export default function Home() {
     if (savedEmail) {
       setEmail(savedEmail);
       setEmailConfirmed(true);
-      // Récupère le vrai compteur depuis Supabase
       fetch("/api/user/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,6 +29,7 @@ export default function Home() {
         .then((r) => r.json())
         .then((data) => {
           if (data.count !== undefined) setFreeCount(data.count);
+          if (data.is_pro) setIsPro(true);
         });
     }
   }, []);
@@ -40,23 +41,20 @@ export default function Home() {
       alert("Veuillez entrer un email valide.");
       return;
     }
-
-    // Vérifie dans Supabase
     const res = await fetch("/api/user/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
     const data = await res.json();
-
     if (!data.allowed) {
       setShowEmailModal(false);
       alert("Limite gratuite atteinte pour cet email. Passez en Pro pour continuer.");
       return;
     }
-
     localStorage.setItem("facturai_email", email);
     setFreeCount(data.count);
+    if (data.is_pro) setIsPro(true);
     setEmailConfirmed(true);
     setShowEmailModal(false);
     setStep(1);
@@ -75,21 +73,10 @@ export default function Home() {
       setShowEmailModal(true);
       return;
     }
-
-    // Vérifie la limite dans Supabase
-    const res = await fetch("/api/user/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-
-    if (!data.allowed) {
+    if (!isPro && freeCount >= FREE_LIMIT) {
       alert("Limite gratuite atteinte (10 factures). Passez en Pro pour continuer.");
       return;
     }
-
-    setFreeCount(data.count);
     setStep(1);
     setError("");
     setTimeout(() => {
@@ -111,23 +98,18 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       const res = await fetch("/api/invoice/convert", { method: "POST", body: formData });
       const raw = await res.text();
       if (!res.ok) throw new Error(raw);
-
       const data = JSON.parse(raw);
       let facture;
       try { facture = JSON.parse(data.ai); } catch { facture = data.ai; }
-
       const res2 = await fetch("/api/invoice/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ facture }),
       });
-
       if (!res2.ok) { const raw2 = await res2.text(); throw new Error(raw2); }
-
       const blob = await res2.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -136,16 +118,15 @@ export default function Home() {
       document.body.appendChild(a);
       a.click();
       a.remove();
-
-      // Incrémente dans Supabase
-      const incRes = await fetch("/api/user/increment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const incData = await incRes.json();
-      if (incData.count !== undefined) setFreeCount(incData.count);
-
+      if (!isPro) {
+        const incRes = await fetch("/api/user/increment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const incData = await incRes.json();
+        if (incData.count !== undefined) setFreeCount(incData.count);
+      }
       setStep(3);
     } catch (err) {
       setError("Erreur : " + err.message);
@@ -192,6 +173,7 @@ export default function Home() {
         .counter-bar { background: #fff; border: 1px solid #e8ecf0; border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
         .counter-label { font-size: 13px; color: #64748b; }
         .counter-value { font-size: 13px; font-weight: 600; color: #2563eb; }
+        .counter-value.pro { color: #166534; }
         .card { background: #fff; border: 1px solid #e8ecf0; border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; }
         .card h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 1rem; }
         .upload-zone { border: 2px dashed #cbd5e1; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.15s; background: #f8fafc; }
@@ -321,7 +303,9 @@ export default function Home() {
           <span className="counter-label">
             {emailConfirmed ? `Connecté : ${email}` : "Factures gratuites"}
           </span>
-          <span className="counter-value" suppressHydrationWarning>{freeCount} / {FREE_LIMIT}</span>
+          <span className={`counter-value ${isPro ? "pro" : ""}`} suppressHydrationWarning>
+            {isPro ? "✨ Illimité" : `${freeCount} / ${FREE_LIMIT}`}
+          </span>
         </div>
 
         {error && <div className="error-box">{error}</div>}
@@ -354,7 +338,6 @@ export default function Home() {
               </div>
               <input id="fileInput" type="file" style={{ display: "none" }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={(e) => setFile(e.target.files[0])} />
             </div>
-
             {file && (
               <div className="file-selected">
                 <span>📎</span>
@@ -362,7 +345,6 @@ export default function Home() {
                 <button className="file-remove" onClick={() => setFile(null)}>✕</button>
               </div>
             )}
-
             <button className="btn-generate" onClick={handleGenerate} disabled={!file}>
               Générer Factur-X →
             </button>
@@ -467,24 +449,24 @@ export default function Home() {
             >
               Passer au Pro
             </button>
-                <button
-  type="button"
-  className="plan-btn"
-  style={{ marginTop: "8px", fontSize: "13px" }}
-  onClick={async () => {
-    const savedEmail = localStorage.getItem("facturai_email");
-    const res = await fetch("/api/stripe/portal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: savedEmail }),
-    });
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
-    else alert("Erreur : " + data.error);
-  }}
->
-  Gérer mon abonnement
-</button>
+            <button
+              type="button"
+              className="plan-btn"
+              style={{ marginTop: "8px", fontSize: "13px" }}
+              onClick={async () => {
+                const savedEmail = localStorage.getItem("facturai_email");
+                const res = await fetch("/api/stripe/portal", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: savedEmail }),
+                });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else alert("Erreur : " + data.error);
+              }}
+            >
+              Gérer mon abonnement
+            </button>
           </div>
         </div>
       </div>
