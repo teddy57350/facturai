@@ -23,7 +23,7 @@ export default function CGU() {
       <p>FacturAI se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés par email en cas de modification substantielle.</p>
 
       <h2 style={{ fontSize: '18px', fontWeight: '700', marginTop: '2rem', marginBottom: '0.5rem' }}>7. Contact</h2>
-      <p>Pour toute question : <a href="mailto:lallemandteddy@yahoo.fr" style={{ color: '#2563eb' }}>lallemandteddy@yahoo.fr</a></p>
+      <p>Pour toute question : <a href="mailto:lallemandteddy@yahoo.fr" style={{ color: '#2563eb' }}>contact@facturai-x.fr</a></p>
 
       <p style={{ marginTop: '2rem', color: '#64748b', fontSize: '13px' }}>Dernière mise à jour : avril 2026</p>
       <p style={{ marginTop: '1rem' }}><a href="/" style={{ color: '#2563eb' }}>← Retour à l'accueil</a></p>
